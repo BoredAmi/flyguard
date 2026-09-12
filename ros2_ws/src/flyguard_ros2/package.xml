@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>flyguard_ros2</name>
+  <version>0.1.0</version>
+  <description>
+    ROS2 wrapper around the FlyGuard connectome-derived looming detector.
+    looming_node runs a ~530-neuron real FAFB v783 subnetwork (LPLC2 + LC4
+    + LPi + DNp01) as a live LIF simulation and publishes /cmd_vel, with
+    the real Giant Fiber (DNp01) escape pathway driving an emergency stop.
+    vision_node is the real image-based front end (live MuJoCo rendering +
+    Lucas-Kanade optical flow sampled at the real T4/T5 column population);
+    demo_stimulus_node is a scripted stand-in that needs no rendering.
+    vision_node and demo_stimulus_node additionally require the `mujoco`
+    Python package (pip install flyguard[mujoco] -- not a rosdep package,
+    resolved via the flyguard core install, not this package.xml).
+  </description>
+  <maintainer email="azmozgame@gmail.com">flyguard</maintainer>
+  <license>MIT</license>
+
+  <depend>rclpy</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

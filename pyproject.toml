@@ -1,0 +1,57 @@
+[project]
+name = "flyguard"
+version = "0.2.0"
+description = "Connectome-derived collision avoidance for robots: the real Drosophila escape circuit, no training"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Ami" }]
+keywords = [
+    "robotics", "connectome", "neuromorphic", "collision-avoidance",
+    "spiking-neural-network", "optical-flow", "drosophila", "ros2",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+# The runtime deliberately needs nothing heavier than this: it has to run on a
+# companion computer with no graphics stack. Simulation, training and plotting
+# are all optional extras.
+dependencies = ["numpy>=1.24", "scipy>=1.10", "pandas>=2.0"]
+
+[project.urls]
+Homepage = "https://github.com/your-username/flyguard"
+Issues = "https://github.com/your-username/flyguard/issues"
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "matplotlib", "pyflakes"]
+mujoco = ["mujoco>=3.0"]          # the simulated corridor and stimulus renderer
+cnn = ["torch>=2.0"]              # the one baseline allowed to learn
+images = ["pillow>=9.0"]          # calibrating from a directory of image files
+all = ["flyguard[dev,mujoco,cnn,images]"]
+
+[project.scripts]
+flyguard-calibrate = "flyguard.calibrate:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["flyguard*"]
+
+[tool.setuptools.package-data]
+flyguard = ["py.typed", "*.html"]
+
+[tool.pytest.ini_options]
+# Scope plain `pytest` runs from the repo root to the core test suite only.
+# ros2_ws/src/flyguard_ros2/test/ is a separate ament_python package test
+# suite with its own relative-path assumptions ("." meaning that package's
+# own directory) -- it's meant to be run via `colcon test` / pytest from
+# inside ros2_ws/src/flyguard_ros2/, not picked up incidentally here.
+testpaths = ["tests"]

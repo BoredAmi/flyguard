@@ -1,0 +1,35 @@
+[
+  {
+    "resolution": 64,
+    "tick_hz": 10.0,
+    "n_neurons": 530,
+    "perception_ms": 7.24036800011163,
+    "circuit_ms": 67.60209599997324,
+    "total_ms": 70.16739000005145,
+    "budget_ms": 100.0,
+    "realtime_factor": 1.4251634555585817,
+    "headroom": true
+  },
+  {
+    "resolution": 96,
+    "tick_hz": 10.0,
+    "n_neurons": 530,
+    "perception_ms": 9.489527999903657,
+    "circuit_ms": 66.90095799990559,
+    "total_ms": 72.94258000001719,
+    "budget_ms": 100.0,
+    "realtime_factor": 1.370941362369914,
+    "headroom": true
+  },
+  {
+    "resolution": 128,
+    "tick_hz": 10.0,
+    "n_neurons": 530,
+    "perception_ms": 13.378955000007409,
+    "circuit_ms": 67.94094899987613,
+    "total_ms": 77.93760100003055,
+    "budget_ms": 100.0,
+    "realtime_factor": 1.2830777277832917,
+    "headroom": true
+  }
+]

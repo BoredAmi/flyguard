@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+title: "FlyGuard: connectome-derived collision avoidance for robots"
+message: "If you use this software, please cite it and the FlyWire connectome it is built from."
+type: software
+authors:
+  - family-names: "Ami"
+repository-code: "https://github.com/your-username/flyguard"
+abstract: >-
+  A looming detector and obstacle-avoidance controller whose synaptic weights
+  are taken directly from the FlyWire FAFB v783 Drosophila connectome, with no
+  training and no fitted parameters in the detection path. Includes a
+  leaky-integrate-and-fire engine, a retinotopic T4/T5 encoder driven by real
+  optical flow, ROS2 nodes, and both learned and classical baselines for
+  comparison.
+keywords:
+  - connectome
+  - robotics
+  - collision avoidance
+  - spiking neural networks
+  - Drosophila
+license: MIT
+version: 0.2.0
+references:
+  - type: article
+    title: "Neuronal wiring diagram of an adult brain"
+    authors:
+      - family-names: Dorkenwald
+        given-names: Sven
+    journal: Nature
+    volume: 634
+    start: 124
+    end: 138
+    year: 2024
+    doi: 10.1038/s41586-024-07558-y
+  - type: article
+    title: "A leaky integrate-and-fire computational model based on the connectome of the entire adult Drosophila brain"
+    authors:
+      - family-names: Shiu
+        given-names: Philip K.
+    year: 2024
+  - type: article
+    title: "A functionally ordered visual feature map in the Drosophila brain"
+    authors:
+      - family-names: Klapoetke
+        given-names: Nathan C.
+    journal: Nature
+    volume: 551
+    start: 237
+    end: 241
+    year: 2017

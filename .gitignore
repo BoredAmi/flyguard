@@ -1,0 +1,52 @@
+# NOTE: git has no trailing comments in this file -- a "#" after a pattern
+# becomes part of the pattern. Every comment here is on its own line.
+
+# --- Regenerable data ------------------------------------------------------
+# The scripts are the artifacts; their output is disposable. Everything here
+# regenerates in seconds to a couple of minutes -- see README "Reproduce".
+data/*.npz
+data/avoid_recording.json
+
+# data/looming.npz is the exception and IS committed: ~1 MB, and it means
+# nobody has to download 200 MB of Codex CSVs to run the detector.
+!data/looming.npz
+
+# --- Raw connectome downloads ----------------------------------------------
+# 200 MB+ of Codex CSVs. data/PROVENANCE.txt holds their checksums instead.
+*.csv
+!tests/**/*.csv
+
+# --- ROS2 build artifacts --------------------------------------------------
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+
+# --- The paper -------------------------------------------------------------
+# Kept locally, not published with the repo. Build it with `cd paper && make`.
+# The README carries the results and limitations on its own, so nothing in the
+# published repo depends on this directory existing.
+paper/
+
+# --- Python ----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+
+# --- Assistant / local working files ---------------------------------------
+# Project notes for an AI coding assistant. Useful locally, not part of the
+# published package.
+CLAUDE.md
+.claude/
+
+# --- Editors / OS ----------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store

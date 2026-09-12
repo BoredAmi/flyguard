@@ -1,0 +1,75 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  core:
+    # The runtime package and the research layer, on a plain runner with no
+    # GPU and no display. Everything that needs MuJoCo, torch or the FlyWire
+    # CSVs skips cleanly rather than failing -- that property is the point of
+    # keeping the core dependencies to numpy/scipy/pandas, so CI checks it.
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Lint
+        run: python -m pyflakes flyguard tests
+      - name: Tests
+        # PYTEST_DISABLE_PLUGIN_AUTOLOAD keeps third-party pytest plugins from
+        # being picked up; see README "Environment notes".
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+        run: python -m pytest -q
+
+  simulation:
+    # The optional extras, split into two jobs on purpose: MuJoCo's EGL context
+    # and PyTorch's CUDA init in one interpreter can abort the process on some
+    # driver combinations (see README "Environment notes"). Running them apart
+    # keeps a real failure distinguishable from that environmental one.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,mujoco,images]"
+      - name: Tests (headless rendering)
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+          MUJOCO_GL: osmesa
+        run: python -m pytest -q --ignore=tests/test_baseline_cnn.py
+
+  learned-baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,cnn]" --extra-index-url https://download.pytorch.org/whl/cpu
+      - name: Tests (CNN baseline)
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+        run: python -m pytest -q tests/test_baseline_cnn.py

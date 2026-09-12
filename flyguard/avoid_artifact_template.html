@@ -1,0 +1,445 @@
+<title>Corridor Run</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+  :root {
+    --ground: #090d13;
+    --panel: #111926;
+    --panel-2: #0d141f;
+    --edge: #1f2b3c;
+    --grid: #16202e;
+    --ink: #e7eef8;
+    --ink-dim: #9aabc0;
+    --ink-faint: #64748b;
+    --amber: #f2a541;
+    --left: #5b9bf0;
+    --right: #f07a5f;
+    --danger: #e2514f;
+    --good: #4ec9a8;
+    --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    --sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    margin: 0;
+    padding-block: 28px;
+    padding-inline: 20px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+
+  header h1 {
+    font-size: clamp(21px, 3.6vw, 30px);
+    margin: 0 0 6px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  header p { margin: 0; color: var(--ink-dim); font-size: 14px; max-width: 68ch; }
+  header .caveat {
+    margin-top: 10px; font-size: 12.5px; color: var(--ink-faint);
+    border-left: 2px solid var(--edge); padding-left: 11px; max-width: 72ch;
+  }
+
+  .strip {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch;
+    font-family: var(--mono); font-size: 11px;
+  }
+  .chip {
+    background: var(--panel); border: 1px solid var(--edge); border-radius: 3px;
+    padding: 7px 10px; display: flex; flex-direction: column; gap: 2px; min-width: 74px;
+  }
+  .chip b { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+  .chip span { color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.06em; font-size: 9.5px; }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--edge); border-radius: 4px;
+    padding: 13px 14px 11px;
+  }
+  .panel h2 {
+    margin: 0 0 10px; font-size: 10.5px; font-family: var(--mono);
+    text-transform: uppercase; letter-spacing: 0.11em; color: var(--ink-faint); font-weight: 500;
+  }
+  canvas { display: block; width: 100%; }
+
+  .lower { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 18px; align-items: start; }
+  @media (max-width: 720px) { .lower { grid-template-columns: 1fr; } }
+
+  #eye { width: 100%; aspect-ratio: 1 / 1; max-width: 100%; image-rendering: auto;
+         border-radius: 3px; background: #000; display: block; }
+  .eyekey { display: flex; gap: 10px; margin-top: 9px; font-family: var(--mono); font-size: 10px; color: var(--ink-faint); }
+  .eyekey i { width: 9px; height: 9px; border-radius: 2px; display: inline-block; margin-right: 4px; vertical-align: -1px; }
+
+  .controls { display: flex; gap: 11px; align-items: center; flex-wrap: wrap; }
+  button {
+    font-family: var(--mono); font-size: 12px; background: var(--panel-2);
+    color: var(--ink); border: 1px solid var(--edge); border-radius: 3px;
+    padding: 7px 15px; cursor: pointer;
+  }
+  button:hover { border-color: var(--amber); color: var(--amber); }
+  button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  input[type=range] { flex: 1 1 190px; accent-color: var(--amber); min-width: 130px; }
+  .clock { font-family: var(--mono); font-size: 12px; color: var(--ink-dim); min-width: 116px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); margin-top: 9px; }
+  .legend i { width: 11px; height: 3px; display: inline-block; margin-right: 5px; vertical-align: 3px; border-radius: 2px; }
+
+  footer { color: var(--ink-faint); font-size: 12px; border-top: 1px solid var(--edge); padding-top: 13px; }
+  footer code { font-family: var(--mono); font-size: 11.5px; color: var(--ink-dim); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Corridor Run</h1>
+    <p id="lede"></p>
+    <p class="caveat">
+      <b>Steering is not in the connectome.</b> LPLC2/LC4 reach the Giant Fiber (DNp01) and have
+      zero direct edges onto the fly's steering neurons, so the measured circuit can command
+      <i>stop</i>, never <i>turn</i>. The turn command here compares the two hemispheres' LPLC2
+      population rates and turns away from the louder one -- real ingredients, but the comparison
+      operator is an engineering addition, not something read off the wiring diagram.
+    </p>
+  </header>
+
+  <div class="strip" id="stats"></div>
+
+  <div class="panel">
+    <h2>Corridor -- top-down</h2>
+    <canvas id="map"></canvas>
+    <div class="legend">
+      <span><i style="background:var(--amber)"></i>agent &amp; path</span>
+      <span><i style="background:var(--danger)"></i>obstacle</span>
+      <span><i style="background:var(--good)"></i>goal line</span>
+      <span><i style="background:var(--left)"></i>saccade left</span>
+      <span><i style="background:var(--right)"></i>saccade right</span>
+    </div>
+  </div>
+
+  <div class="lower">
+    <div class="panel">
+      <h2>Agent's eye</h2>
+      <img id="eye" alt="rendered camera view from the agent">
+      <div class="eyekey">
+        <span><i style="background:var(--left)"></i>left eye</span>
+        <span><i style="background:var(--right)"></i>right eye</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Circuit output</h2>
+      <canvas id="traces"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--left)"></i>LPLC2 left (Hz)</span>
+        <span><i style="background:var(--right)"></i>LPLC2 right (Hz)</span>
+        <span><i style="background:var(--amber)"></i>turn command</span>
+        <span><i style="background:var(--danger)"></i>DNp01 escape / braking</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel controls">
+    <button id="play">▶ Play</button>
+    <input type="range" id="scrub" min="0" value="0" step="1" aria-label="timeline">
+    <span class="clock" id="clock"></span>
+    <button id="speed">1x</button>
+  </div>
+
+  <footer id="foot"></footer>
+</div>
+
+<script type="application/json" id="run-data">/*__DATA__*/</script>
+<script>
+(function () {
+  const DATA = JSON.parse(document.getElementById('run-data').textContent);
+  const T = DATA.telemetry, F = DATA.frames_jpeg_b64, A = DATA.arena, M = DATA.meta;
+  const N = T.length;
+  const css = k => getComputedStyle(document.documentElement).getPropertyValue(k).trim();
+  const C = {
+    amber: css('--amber'), left: css('--left'), right: css('--right'),
+    danger: css('--danger'), good: css('--good'), edge: css('--edge'),
+    grid: css('--grid'), ink: css('--ink'), dim: css('--ink-dim'), faint: css('--ink-faint'),
+    panel2: css('--panel-2')
+  };
+
+  // ---- header text -------------------------------------------------------
+  const verdict = { goal: 'reached the far end', collided: 'clipped an obstacle',
+                    timeout: 'ran out of time still weaving' }[M.outcome] || M.outcome;
+  document.getElementById('lede').textContent =
+    `One closed-loop run through a randomised corridor. Every tick the agent renders its own ` +
+    `eye view, estimates optical flow, drives each optic lobe from its own half of that image, ` +
+    `simulates the real 530-neuron circuit from the FlyWire connectome, and steers on the result. ` +
+    `Nothing is trained. This run ${verdict} at ${M.progress_x.toFixed(1)} m of ${M.goal_x} m.`;
+
+  const stats = [
+    ['outcome', M.outcome],
+    ['reached', M.progress_x.toFixed(1) + ' m'],
+    ['of', M.goal_x + ' m'],
+    ['obstacles', A.obstacles.length],
+    ['closest pass', M.min_clearance.toFixed(2) + ' m'],
+    ['braking ticks', M.n_estop_ticks],
+    ['duration', (N / M.tick_hz).toFixed(1) + ' s']
+  ];
+  document.getElementById('stats').innerHTML = stats.map(([k, v]) =>
+    `<div class="chip"><span>${k}</span><b>${v}</b></div>`).join('');
+
+  document.getElementById('foot').innerHTML =
+    `Arena seed ${M.arena_seed}, ${M.controller} controller, ${M.resolution}px camera at ` +
+    `${M.tick_hz} Hz. Regenerate with <code>python -m flyguard.record_avoid_demo --arena ` +
+    `${M.arena_seed}</code>. Weights are real synapse counts from FlyWire FAFB v783; no ` +
+    `parameter in the circuit path is fitted.`;
+
+  // ---- canvases ----------------------------------------------------------
+  const map = document.getElementById('map'), mctx = map.getContext('2d');
+  const tr = document.getElementById('traces'), tctx = tr.getContext('2d');
+  const eye = document.getElementById('eye');
+
+  const X0 = -1.5, X1 = M.goal_x + 2.0;
+  const YH = A.lane_half_width;
+
+  function sizeCanvas(cv, ctx, cssH) {
+    const dpr = window.devicePixelRatio || 1;
+    const w = cv.clientWidth || 600;
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(cssH * dpr);
+    cv.style.height = cssH + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { w, h: cssH };
+  }
+
+  let mapDim, trDim;
+  function layout() {
+    const w = map.clientWidth || 600;
+    // keep the corridor's aspect honest but never taller than is readable
+    const h = Math.max(120, Math.min(260, w * (2 * YH) / (X1 - X0)));
+    mapDim = sizeCanvas(map, mctx, h);
+    trDim = sizeCanvas(tr, tctx, 236);
+    draw(idx);
+  }
+
+  const mx = x => ((x - X0) / (X1 - X0)) * mapDim.w;
+  const my = y => mapDim.h / 2 - (y / YH) * (mapDim.h / 2 - 6);
+  const mscale = () => (mapDim.h / 2 - 6) / YH;
+
+  function drawMap(i) {
+    const { w, h } = mapDim;
+    mctx.clearRect(0, 0, w, h);
+    mctx.fillStyle = C.panel2;
+    mctx.fillRect(0, 0, w, h);
+
+    // corridor walls
+    mctx.strokeStyle = C.edge; mctx.lineWidth = 2;
+    mctx.beginPath();
+    mctx.moveTo(mx(X0), my(YH)); mctx.lineTo(mx(X1), my(YH));
+    mctx.moveTo(mx(X0), my(-YH)); mctx.lineTo(mx(X1), my(-YH));
+    mctx.stroke();
+
+    // distance ticks
+    mctx.strokeStyle = C.grid; mctx.lineWidth = 1;
+    mctx.fillStyle = C.faint; mctx.font = '9px "IBM Plex Mono", monospace';
+    mctx.textAlign = 'center';
+    for (let d = 0; d <= M.goal_x; d += 5) {
+      mctx.beginPath(); mctx.moveTo(mx(d), my(YH)); mctx.lineTo(mx(d), my(-YH)); mctx.stroke();
+      mctx.fillText(d + 'm', mx(d), h - 3);
+    }
+
+    // goal line
+    mctx.strokeStyle = C.good; mctx.lineWidth = 2; mctx.setLineDash([5, 4]);
+    mctx.beginPath(); mctx.moveTo(mx(M.goal_x), my(YH)); mctx.lineTo(mx(M.goal_x), my(-YH)); mctx.stroke();
+    mctx.setLineDash([]);
+
+    // obstacles
+    const s = mscale();
+    A.obstacles.forEach(([ox, oy]) => {
+      mctx.beginPath();
+      mctx.arc(mx(ox), my(oy), Math.max(2.5, A.obstacle_radius * s), 0, Math.PI * 2);
+      mctx.fillStyle = 'rgba(226,81,79,0.24)'; mctx.fill();
+      mctx.strokeStyle = C.danger; mctx.lineWidth = 1.4; mctx.stroke();
+    });
+
+    // path travelled so far
+    mctx.strokeStyle = C.amber; mctx.lineWidth = 1.8;
+    mctx.beginPath();
+    for (let k = 0; k <= i; k++) {
+      const p = T[k];
+      if (k === 0) mctx.moveTo(mx(p.x), my(p.y)); else mctx.lineTo(mx(p.x), my(p.y));
+    }
+    mctx.stroke();
+
+    // saccade markers along the path
+    for (let k = 0; k <= i; k++) {
+      const p = T[k];
+      if (!p.saccade) continue;
+      const prev = T[k - 1];
+      if (prev && prev.saccade) continue;           // mark onsets only
+      mctx.beginPath();
+      mctx.arc(mx(p.x), my(p.y), 2.6, 0, Math.PI * 2);
+      mctx.fillStyle = (p.omega > 0) ? C.left : C.right;
+      mctx.fill();
+    }
+
+    // braking stretches
+    for (let k = 0; k <= i; k++) {
+      if (!T[k].estop) continue;
+      mctx.beginPath();
+      mctx.arc(mx(T[k].x), my(T[k].y), 1.2, 0, Math.PI * 2);
+      mctx.fillStyle = C.danger; mctx.fill();
+    }
+
+    // agent
+    const p = T[i];
+    const ax = mx(p.x), ay = my(p.y), hd = -p.heading;  // canvas y is flipped
+    mctx.save();
+    mctx.translate(ax, ay); mctx.rotate(hd);
+    mctx.beginPath();
+    mctx.moveTo(8, 0); mctx.lineTo(-5, 5); mctx.lineTo(-5, -5); mctx.closePath();
+    mctx.fillStyle = p.estop ? C.danger : C.amber; mctx.fill();
+    mctx.restore();
+    mctx.beginPath();
+    mctx.arc(ax, ay, Math.max(2, A.agent_radius * s), 0, Math.PI * 2);
+    mctx.strokeStyle = 'rgba(242,165,65,0.45)'; mctx.lineWidth = 1; mctx.stroke();
+  }
+
+  // --- traces -------------------------------------------------------------
+  const rateMax = Math.max(60, ...T.map(p => Math.max(p.lplc2_left_hz || 0, p.lplc2_right_hz || 0))) * 1.08;
+
+  function drawTraces(i) {
+    const { w, h } = trDim;
+    tctx.clearRect(0, 0, w, h);
+    tctx.fillStyle = C.panel2; tctx.fillRect(0, 0, w, h);
+
+    const padL = 34, padR = 6;
+    const plotW = w - padL - padR;
+    const rows = [
+      { y0: 8, y1: 92 },     // LPLC2 rates
+      { y0: 104, y1: 176 },  // turn command
+      { y0: 188, y1: 228 }   // speed + escape
+    ];
+    const X = k => padL + (k / Math.max(1, N - 1)) * plotW;
+
+    tctx.font = '9px "IBM Plex Mono", monospace';
+    tctx.textAlign = 'right';
+
+    // --- row 1: LPLC2 population rates
+    let r = rows[0];
+    tctx.strokeStyle = C.grid; tctx.lineWidth = 1;
+    tctx.beginPath(); tctx.moveTo(padL, r.y1); tctx.lineTo(w - padR, r.y1); tctx.stroke();
+    tctx.fillStyle = C.faint;
+    tctx.fillText(Math.round(rateMax) + 'Hz', padL - 5, r.y0 + 7);
+    tctx.fillText('0', padL - 5, r.y1);
+    const Y1 = v => r.y1 - (Math.min(v, rateMax) / rateMax) * (r.y1 - r.y0);
+    [['lplc2_left_hz', C.left], ['lplc2_right_hz', C.right]].forEach(([key, col]) => {
+      tctx.strokeStyle = col; tctx.lineWidth = 1.4; tctx.beginPath();
+      for (let k = 0; k < N; k++) {
+        const v = T[k][key] || 0;
+        if (k === 0) tctx.moveTo(X(k), Y1(v)); else tctx.lineTo(X(k), Y1(v));
+      }
+      tctx.stroke();
+    });
+
+    // --- row 2: turn command with the calibrated saccade threshold
+    r = rows[1];
+    const mid = (r.y0 + r.y1) / 2;
+    const Y2 = v => mid - Math.max(-1, Math.min(1, v)) * (r.y1 - r.y0) / 2;
+    tctx.strokeStyle = C.grid; tctx.beginPath();
+    tctx.moveTo(padL, mid); tctx.lineTo(w - padR, mid); tctx.stroke();
+    if (M.saccade_threshold != null) {
+      tctx.strokeStyle = 'rgba(154,171,192,0.35)'; tctx.setLineDash([3, 3]);
+      [M.saccade_threshold, -M.saccade_threshold].forEach(v => {
+        tctx.beginPath(); tctx.moveTo(padL, Y2(v)); tctx.lineTo(w - padR, Y2(v)); tctx.stroke();
+      });
+      tctx.setLineDash([]);
+    }
+    tctx.fillStyle = C.faint;
+    tctx.fillText('turn L', padL - 5, r.y0 + 8);
+    tctx.fillText('turn R', padL - 5, r.y1);
+    tctx.strokeStyle = C.amber; tctx.lineWidth = 1.4; tctx.beginPath();
+    for (let k = 0; k < N; k++) {
+      const v = T[k].turn || 0;
+      if (k === 0) tctx.moveTo(X(k), Y2(v)); else tctx.lineTo(X(k), Y2(v));
+    }
+    tctx.stroke();
+
+    // --- row 3: speed, with braking shaded
+    r = rows[2];
+    const vmax = Math.max(...T.map(p => p.v || 0)) || 1;
+    const Y3 = v => r.y1 - (v / vmax) * (r.y1 - r.y0);
+    tctx.strokeStyle = C.grid; tctx.beginPath();
+    tctx.moveTo(padL, r.y1); tctx.lineTo(w - padR, r.y1); tctx.stroke();
+    tctx.fillStyle = 'rgba(226,81,79,0.30)';
+    for (let k = 0; k < N; k++) {
+      if (!T[k].estop) continue;
+      tctx.fillRect(X(k), r.y0, Math.max(1, plotW / N), r.y1 - r.y0);
+    }
+    tctx.strokeStyle = C.dim; tctx.lineWidth = 1.3; tctx.beginPath();
+    for (let k = 0; k < N; k++) {
+      const v = T[k].v || 0;
+      if (k === 0) tctx.moveTo(X(k), Y3(v)); else tctx.lineTo(X(k), Y3(v));
+    }
+    tctx.stroke();
+    tctx.fillStyle = C.faint;
+    tctx.fillText('speed', padL - 5, r.y0 + 8);
+
+    // playhead
+    tctx.strokeStyle = C.ink; tctx.lineWidth = 1;
+    tctx.beginPath(); tctx.moveTo(X(i), 4); tctx.lineTo(X(i), h - 4); tctx.stroke();
+  }
+
+  // ---- playback ----------------------------------------------------------
+  let idx = 0, playing = false, speed = 1, last = 0;
+  const scrub = document.getElementById('scrub');
+  const clock = document.getElementById('clock');
+  const playBtn = document.getElementById('play');
+  const speedBtn = document.getElementById('speed');
+  scrub.max = String(N - 1);
+
+  function draw(i) {
+    if (!mapDim) return;
+    drawMap(i);
+    drawTraces(i);
+    if (F[i]) eye.src = 'data:image/jpeg;base64,' + F[i];
+    const p = T[i];
+    clock.textContent = `${(i / M.tick_hz).toFixed(1)}s | x=${p.x.toFixed(1)}m` +
+                        (p.estop ? ' | BRAKING' : '');
+    clock.style.color = p.estop ? C.danger : C.dim;
+    scrub.value = String(i);
+  }
+
+  function tick(ts) {
+    if (playing) {
+      if (!last) last = ts;
+      const step = 1000 / (M.tick_hz * speed);
+      if (ts - last >= step) {
+        last = ts;
+        idx = idx + 1;
+        if (idx >= N) { idx = 0; }
+        draw(idx);
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  playBtn.addEventListener('click', () => {
+    playing = !playing; last = 0;
+    playBtn.textContent = playing ? '❚❚ Pause' : '▶ Play';
+  });
+  speedBtn.addEventListener('click', () => {
+    speed = speed === 1 ? 2 : (speed === 2 ? 0.5 : 1);
+    speedBtn.textContent = speed + 'x';
+  });
+  scrub.addEventListener('input', () => { idx = +scrub.value; draw(idx); });
+  window.addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); playBtn.click(); }
+    if (e.code === 'ArrowRight') { idx = Math.min(N - 1, idx + 1); draw(idx); }
+    if (e.code === 'ArrowLeft') { idx = Math.max(0, idx - 1); draw(idx); }
+  });
+  window.addEventListener('resize', layout);
+
+  layout();
+  draw(0);
+  requestAnimationFrame(tick);
+})();
+</script>
