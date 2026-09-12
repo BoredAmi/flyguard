@@ -70,7 +70,7 @@ class BilateralEncoder:
       right eye the rostral direction points toward the image *centre*,
       while for the left eye it points toward the image edge. This is the
       geometrically motivated choice, and it is exactly the per-hemisphere
-      ambiguity CLAUDE.md flags as unresolved.
+      ambiguity the project notes flag as unresolved.
 
     Both are provided because neither is confirmed. Running the closed loop
     under both is a *behavioural* test of the convention, which is more than

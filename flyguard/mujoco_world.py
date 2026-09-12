@@ -1,4 +1,4 @@
-"""Layer 2 of the architecture (CLAUDE.md): MuJoCo headless rendering of the
+"""Layer 2 of the architecture (the project notes): MuJoCo headless rendering of the
 looming-vs-translation stimulus pair as real images, offline, into `.npz`
 datasets -- the step between the synthetic flow fields in `flyguard.stimuli`
 and the offline benchmark that will replay these frames through the LIF
@@ -13,7 +13,7 @@ scripted via a MuJoCo mocap body (kinematic, not simulated) rather than
 free-body physics: there is no collision or dynamics to integrate here,
 only a stimulus trajectory, so scripting position directly as a function of
 frame index keeps rendering exactly reproducible and independent of CPU
-speed (no physics timestep to drift), per CLAUDE.md's hardware-constraints
+speed (no physics timestep to drift), per the project notes' hardware-constraints
 note. Rendering itself is GPU-accelerated via EGL; nothing downstream of
 the rendered frames needs the GPU.
 
@@ -151,7 +151,7 @@ def matched_depth_trial_params(condition: str, seed: int, n_frames: int = 60,
     translation 3-5m).
 
     Exists because of a real confound found while building the real
-    image-based encoder (`validate_real_encoder.py`, see CLAUDE.md "Pilot
+    image-based encoder (`validate_real_encoder.py`, see the project notes "Pilot
     findings"): a raw-pixel-evidence drive scheme (more boundary/edge
     pixels with detectable optical flow -> more driven T4/T5 columns ->
     more aggregate LIF excitation) is not size-invariant the way Lee's tau

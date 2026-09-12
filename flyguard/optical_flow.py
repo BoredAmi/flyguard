@@ -1,11 +1,11 @@
 """Dense optical flow from real rendered frame pairs (Lucas-Kanade), the
-missing piece flagged repeatedly in CLAUDE.md: the retinotopic encoder has
+missing piece flagged repeatedly in the project notes: the retinotopic encoder has
 so far only ever consumed synthetic flow fields
 (`encoder.expanding_flow_2d`/`translational_flow_2d`) computed analytically
 from a trial's *known* condition and trajectory, never flow actually
 estimated from pixels. This module closes that gap.
 
-No OpenCV (CLAUDE.md "Keep dependencies minimal": numpy, scipy, pandas
+No OpenCV (the project notes "Keep dependencies minimal": numpy, scipy, pandas
 only) -- classic Lucas-Kanade (Lucas & Kanade 1981) implemented directly
 with `scipy.ndimage` for gradients and windowed sums, the textbook
 closed-form least-squares solution over local windows under the brightness

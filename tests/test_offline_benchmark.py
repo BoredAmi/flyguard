@@ -51,7 +51,7 @@ def test_connectome_accuracy_perfect_when_well_separated():
 
 @pytest.mark.skipif(not REAL_SWEEP.exists(), reason="data/hemisphere_sweep.json not present")
 def test_connectome_accuracy_matches_known_reference_numbers():
-    """Regression check against the numbers reported in CLAUDE.md 'Pilot
+    """Regression check against the numbers reported in the project notes 'Pilot
     findings' for the offline benchmark -- right hemisphere's exceeding
     band (5/24 headings) costs real accuracy relative to the left."""
     result = connectome_accuracy(REAL_SWEEP)

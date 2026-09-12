@@ -68,7 +68,10 @@
           "progress_x": 5.399999999999997,
           "path_length": 5.399999999999997,
           "min_clearance": -0.056974375374612196,
-          "n_estop_ticks": 0
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
         },
         {
           "controller": "straight",
@@ -79,7 +82,10 @@
           "progress_x": 5.299999999999997,
           "path_length": 5.299999999999997,
           "min_clearance": -0.0989785678739386,
-          "n_estop_ticks": 0
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
         },
         {
           "controller": "straight",
@@ -90,7 +96,10 @@
           "progress_x": 5.799999999999995,
           "path_length": 5.799999999999995,
           "min_clearance": -0.01137673679976875,
-          "n_estop_ticks": 0
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
         },
         {
           "controller": "straight",
@@ -101,7 +110,10 @@
           "progress_x": 15.79999999999996,
           "path_length": 15.79999999999996,
           "min_clearance": -0.05225261903277839,
-          "n_estop_ticks": 0
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
         },
         {
           "controller": "straight",
@@ -112,7 +124,10 @@
           "progress_x": 8.799999999999985,
           "path_length": 8.799999999999985,
           "min_clearance": -0.09906210706204094,
-          "n_estop_ticks": 0
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
         },
         {
           "controller": "straight",
@@ -123,7 +138,10 @@
           "progress_x": 12.299999999999972,
           "path_length": 12.299999999999972,
           "min_clearance": -0.09828417597313327,
-          "n_estop_ticks": 0
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
         },
         {
           "controller": "straight",
@@ -134,7 +152,10 @@
           "progress_x": 5.299999999999997,
           "path_length": 5.299999999999997,
           "min_clearance": -0.08942647003541576,
-          "n_estop_ticks": 0
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
         },
         {
           "controller": "straight",
@@ -145,7 +166,10 @@
           "progress_x": 5.399999999999997,
           "path_length": 5.399999999999997,
           "min_clearance": -0.07872024301661801,
-          "n_estop_ticks": 0
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
         },
         {
           "controller": "straight",
@@ -156,7 +180,10 @@
           "progress_x": 5.4999999999999964,
           "path_length": 5.4999999999999964,
           "min_clearance": -0.053963008312748195,
-          "n_estop_ticks": 0
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
         },
         {
           "controller": "straight",
@@ -167,7 +194,10 @@
           "progress_x": 9.099999999999984,
           "path_length": 9.099999999999984,
           "min_clearance": -0.009192640414812103,
-          "n_estop_ticks": 0
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
         }
       ]
     },
@@ -178,7 +208,7 @@
       "mean_progress_x": 23.20052512039159,
       "mean_min_clearance": 0.1519651473383518,
       "mean_estop_ticks": 27.6,
-      "seconds": 42.5,
+      "seconds": 41.2,
       "per_arena": [
         {
           "controller": "flow",
@@ -189,7 +219,10 @@
           "progress_x": 28.395709288436027,
           "path_length": 30.46000000000016,
           "min_clearance": 0.41440211789953996,
-          "n_estop_ticks": 22
+          "n_estop_ticks": 22,
+          "collision_kind": "none",
+          "final_y": -1.0647439866307333,
+          "final_heading_deg": 0.0
         },
         {
           "controller": "flow",
@@ -200,7 +233,10 @@
           "progress_x": 28.45335738906768,
           "path_length": 30.60000000000018,
           "min_clearance": 0.07397819069880479,
-          "n_estop_ticks": 20
+          "n_estop_ticks": 20,
+          "collision_kind": "none",
+          "final_y": 0.2719902722504201,
+          "final_heading_deg": 9.16732472209318
         },
         {
           "controller": "flow",
@@ -211,7 +247,10 @@
           "progress_x": 12.488415329801699,
           "path_length": 13.089999999999964,
           "min_clearance": -0.01406489404203265,
-          "n_estop_ticks": 13
+          "n_estop_ticks": 13,
+          "collision_kind": "obstacle",
+          "final_y": 1.602158872300986,
+          "final_heading_deg": -9.167324722093174
         },
         {
           "controller": "flow",
@@ -222,7 +261,10 @@
           "progress_x": 15.769671009337344,
           "path_length": 19.460000000000015,
           "min_clearance": -0.08403756245436744,
-          "n_estop_ticks": 52
+          "n_estop_ticks": 52,
+          "collision_kind": "wall",
+          "final_y": -3.7340375624543674,
+          "final_heading_deg": -80.0
         },
         {
           "controller": "flow",
@@ -233,7 +275,10 @@
           "progress_x": 27.36065322605455,
           "path_length": 30.040000000000173,
           "min_clearance": 0.3640006964437622,
-          "n_estop_ticks": 28
+          "n_estop_ticks": 28,
+          "collision_kind": "none",
+          "final_y": -0.5372505395734357,
+          "final_heading_deg": -18.33464944418634
         },
         {
           "controller": "flow",
@@ -244,7 +289,10 @@
           "progress_x": 25.97332693321468,
           "path_length": 29.200000000000166,
           "min_clearance": 0.2777451576542028,
-          "n_estop_ticks": 40
+          "n_estop_ticks": 40,
+          "collision_kind": "none",
+          "final_y": 2.1534004241544276,
+          "final_heading_deg": -20.84057194302491
         },
         {
           "controller": "flow",
@@ -255,7 +303,10 @@
           "progress_x": 12.947736282637434,
           "path_length": 13.639999999999967,
           "min_clearance": -0.010822637829574766,
-          "n_estop_ticks": 28
+          "n_estop_ticks": 28,
+          "collision_kind": "obstacle",
+          "final_y": -1.2064296960006091,
+          "final_heading_deg": 45.836623610465864
         },
         {
           "controller": "flow",
@@ -266,7 +317,10 @@
           "progress_x": 23.503444304622832,
           "path_length": 26.110000000000113,
           "min_clearance": -0.04736465530200845,
-          "n_estop_ticks": 37
+          "n_estop_ticks": 37,
+          "collision_kind": "obstacle",
+          "final_y": 0.4427435617415403,
+          "final_heading_deg": 27.501974166279513
         },
         {
           "controller": "flow",
@@ -277,7 +331,10 @@
           "progress_x": 28.04049225371348,
           "path_length": 29.760000000000154,
           "min_clearance": 0.16908816799661552,
-          "n_estop_ticks": 32
+          "n_estop_ticks": 32,
+          "collision_kind": "none",
+          "final_y": -1.1879455584682337,
+          "final_heading_deg": 18.334649444186347
         },
         {
           "controller": "flow",
@@ -288,7 +345,10 @@
           "progress_x": 29.072445187030173,
           "path_length": 30.02000000000016,
           "min_clearance": 0.37672689231857615,
-          "n_estop_ticks": 4
+          "n_estop_ticks": 4,
+          "collision_kind": "none",
+          "final_y": -1.2364199465957522,
+          "final_heading_deg": 0.0
         }
       ]
     },
@@ -299,7 +359,7 @@
       "mean_progress_x": 11.816654358376036,
       "mean_min_clearance": -0.012053417884586765,
       "mean_estop_ticks": 46.3,
-      "seconds": 137.2,
+      "seconds": 140.6,
       "per_arena": [
         {
           "controller": "connectome",
@@ -310,7 +370,10 @@
           "progress_x": 9.823613265235181,
           "path_length": 11.639999999999972,
           "min_clearance": -0.09791140487482153,
-          "n_estop_ticks": 48
+          "n_estop_ticks": 48,
+          "collision_kind": "wall",
+          "final_y": -3.7479114048748214,
+          "final_heading_deg": -80.0
         },
         {
           "controller": "connectome",
@@ -321,7 +384,10 @@
           "progress_x": 9.527903235583642,
           "path_length": 10.79999999999997,
           "min_clearance": -0.053732722196993876,
-          "n_estop_ticks": 70
+          "n_estop_ticks": 70,
+          "collision_kind": "wall",
+          "final_y": -3.703732722196994,
+          "final_heading_deg": -80.0
         },
         {
           "controller": "connectome",
@@ -332,7 +398,10 @@
           "progress_x": 10.184932084265245,
           "path_length": 11.059999999999976,
           "min_clearance": -0.041534840333032896,
-          "n_estop_ticks": 32
+          "n_estop_ticks": 32,
+          "collision_kind": "wall",
+          "final_y": 3.691534840333033,
+          "final_heading_deg": 27.50197416627952
         },
         {
           "controller": "connectome",
@@ -343,7 +412,10 @@
           "progress_x": 23.839299695963593,
           "path_length": 25.070000000000096,
           "min_clearance": 0.24210469527289513,
-          "n_estop_ticks": 99
+          "n_estop_ticks": 99,
+          "collision_kind": "none",
+          "final_y": 3.407895304727105,
+          "final_heading_deg": 27.50197416627952
         },
         {
           "controller": "connectome",
@@ -354,7 +426,10 @@
           "progress_x": 19.775211489453493,
           "path_length": 21.33000000000003,
           "min_clearance": -0.02765264733844225,
-          "n_estop_ticks": 101
+          "n_estop_ticks": 101,
+          "collision_kind": "obstacle",
+          "final_y": 1.0824504018290706,
+          "final_heading_deg": -27.50197416627952
         },
         {
           "controller": "connectome",
@@ -365,7 +440,10 @@
           "progress_x": 16.50485089732714,
           "path_length": 17.819999999999983,
           "min_clearance": -0.01830674789994058,
-          "n_estop_ticks": 34
+          "n_estop_ticks": 34,
+          "collision_kind": "wall",
+          "final_y": -3.6683067478999405,
+          "final_heading_deg": -80.0
         },
         {
           "controller": "connectome",
@@ -376,7 +454,10 @@
           "progress_x": 10.45291463300056,
           "path_length": 11.339999999999977,
           "min_clearance": -0.009227964958769874,
-          "n_estop_ticks": 8
+          "n_estop_ticks": 8,
+          "collision_kind": "wall",
+          "final_y": -3.65922796495877,
+          "final_heading_deg": -27.50197416627952
         },
         {
           "controller": "connectome",
@@ -387,7 +468,10 @@
           "progress_x": 8.120232445860239,
           "path_length": 9.009999999999986,
           "min_clearance": -0.03304325923717677,
-          "n_estop_ticks": 17
+          "n_estop_ticks": 17,
+          "collision_kind": "wall",
+          "final_y": -3.6830432592371767,
+          "final_heading_deg": -27.50197416627952
         },
         {
           "controller": "connectome",
@@ -398,7 +482,10 @@
           "progress_x": 2.536679676969092,
           "path_length": 5.319999999999997,
           "min_clearance": -0.03578532377882926,
-          "n_estop_ticks": 54
+          "n_estop_ticks": 54,
+          "collision_kind": "wall",
+          "final_y": -3.685785323778829,
+          "final_heading_deg": -80.0
         },
         {
           "controller": "connectome",
@@ -409,7 +496,10 @@
           "progress_x": 7.400906160102162,
           "path_length": 8.299999999999986,
           "min_clearance": -0.045443963500755746,
-          "n_estop_ticks": 0
+          "n_estop_ticks": 0,
+          "collision_kind": "wall",
+          "final_y": -3.6954439635007557,
+          "final_heading_deg": -36.669298888372694
         }
       ]
     }

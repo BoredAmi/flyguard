@@ -16,7 +16,7 @@ from flyguard.encoder import (
 )
 
 # The real column_assignment.csv lives outside this repo (see
-# CLAUDE.md "Actual Codex file schema" -- raw Codex CSVs are not committed,
+# the project notes "Actual Codex file schema" -- raw Codex CSVs are not committed,
 # only the extracted .npz). Integration tests against it are skipped when
 # it's not present, e.g. in CI.
 REAL_CSV = Path(__file__).resolve().parents[2] / "flywire" / "column_assignment.csv"
@@ -109,7 +109,7 @@ def test_encode_i_ext_aligns_to_subnetwork_ordering_and_scales_by_peak_weight():
 
 def test_poisson_stim_fn_impulses_are_sparse_not_constant():
     """Regression test for the encoder methodology pitfall documented in
-    CLAUDE.md: feeding a static drive-derived value into i_ext on every
+    the project notes: feeding a static drive-derived value into i_ext on every
     step saturates the network (peak_weight alone exceeds the spike
     threshold). `poisson_stim_fn` must instead emit impulses only on a
     minority of steps, even for a neuron with maximal drive."""

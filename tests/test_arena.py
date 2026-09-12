@@ -11,6 +11,7 @@ mujoco = pytest.importorskip("mujoco", reason="mujoco is an optional extra")
 
 from flyguard.arena import (
     AgentState,
+    collision_kind,
     ArenaConfig,
     build_arena_xml,
     clearance,
@@ -131,7 +132,7 @@ def test_arena_xml_compiles_and_renders_with_contrast():
         r.close()
     assert frame.shape == (96, 96, 3)
     # A scene too dim or too flat to threshold has bitten this project before
-    # (see CLAUDE.md on mujoco_world's lighting bug); require real structure.
+    # (see the project notes on mujoco_world's lighting bug); require real structure.
     assert frame.astype(float).std() > 20.0
 
 
@@ -171,3 +172,42 @@ def test_heading_rotates_the_view():
         r.close()
     assert np.abs(straight - turned).mean() > 1.0
     np.testing.assert_array_equal(straight, same)  # rendering is deterministic
+
+
+# --- what was hit, not just that something was -----------------------------
+
+
+def test_collision_kind_separates_wall_from_obstacle():
+    """A pillar strike is a detection failure; a wall strike is usually a
+    steering one -- a controller that committed a turn and never corrected.
+    Reporting them as one number hides which is happening."""
+    cfg = ArenaConfig(lane_half_width=4.0, agent_radius=0.35, obstacle_radius=0.45)
+    obstacles = np.array([[6.0, 0.0]])
+
+    clear = AgentState(x=2.0, y=0.0, heading=0.0)
+    assert collision_kind(clear, obstacles, cfg) == "none"
+
+    on_pillar = AgentState(x=6.0, y=0.0, heading=0.0)
+    assert collision_kind(on_pillar, obstacles, cfg) == "obstacle"
+
+    # Far from any pillar, but against the -y wall.
+    on_wall = AgentState(x=2.0, y=-(4.0 - 0.35), heading=0.0)
+    assert collision_kind(on_wall, obstacles, cfg) == "wall"
+
+
+def test_collision_kind_agrees_with_collides():
+    cfg = ArenaConfig()
+    obstacles = sample_obstacles(cfg)
+    for x, y in ((1.0, 0.0), (6.0, 0.0), (3.0, 3.7), (12.0, -3.9)):
+        state = AgentState(x=x, y=y, heading=0.0)
+        hit = collides(state, obstacles, cfg)
+        kind = collision_kind(state, obstacles, cfg)
+        assert hit == (kind != "none"), (x, y, hit, kind)
+
+
+def test_collision_kind_handles_an_empty_corridor():
+    """Calibration runs use zero obstacles; the wall is then the only surface."""
+    cfg = ArenaConfig(n_obstacles=0)
+    empty = np.zeros((0, 2))
+    assert collision_kind(AgentState(1.0, 0.0, 0.0), empty, cfg) == "none"
+    assert collision_kind(AgentState(1.0, -3.7, 0.0), empty, cfg) == "wall"

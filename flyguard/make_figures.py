@@ -144,7 +144,7 @@ def fig_stimulus_strip(out: Path, resolution: int = 96, n_frames: int = 6):
     # Matched starting depth for both rows -- the controlled pair the real
     # -encoder experiment actually uses. Drawing them at the *unmatched*
     # depths make_trial_params draws by default would show the size confound
-    # documented in CLAUDE.md rather than the comparison being made here.
+    # documented in the project notes rather than the comparison being made here.
     depth0 = 5.0
     model = mujoco.MjModel.from_xml_string(SCENE_XML)
     data = mujoco.MjData(model)

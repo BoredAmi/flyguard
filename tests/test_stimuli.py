@@ -32,7 +32,7 @@ def test_translation_sums_to_exactly_zero_opponency_drive(direction_deg):
     """Uniform translation, at ANY heading, drives the four 90-degree-spaced
     arms into exact conflict: sum(exc - inh) == 0 by symmetry, since the
     four rectified-cosine channels are evenly spaced around the circle.
-    This is the core discrimination claim from CLAUDE.md, checked
+    This is the core discrimination claim from the project notes, checked
     analytically (no spiking involved)."""
     positions = visual_field_positions()
     drives = arm_responses(translational_flow(positions, direction_deg), positions)
@@ -50,7 +50,7 @@ def test_looming_opponency_drive_is_positive_and_larger_than_any_translation():
 
 def test_subtype_channels_are_four_distinct_and_labelled():
     """Structural property the circuit actually needs: four mutually
-    distinct channels. Direction labels are now resolved (CLAUDE.md
+    distinct channels. Direction labels are now resolved (the project notes
     RESOLVED section) and should match a/b/c/d -> front-to-back /
     back-to-front / upward / downward."""
     assert len(SUBTYPE_DIRS_DEG) == 4
@@ -85,7 +85,7 @@ def test_lif_circuit_noise_stays_near_translation_floor():
 
 
 def test_lpi_ablation_breaks_discrimination():
-    """CLAUDE.md task 5: deleting a cell type (here, LPi) should make the
+    """the project's task 5: deleting a cell type (here, LPi) should make the
     detector fire at everything -- looming and translation/noise should
     converge once opponency is removed, and non-looming rates should rise
     sharply relative to the intact circuit."""

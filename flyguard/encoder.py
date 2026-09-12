@@ -1,6 +1,6 @@
 """Retinotopic encoder: optic flow field -> T4/T5 firing -> LPLC2 drive.
 
-Task 1 of the architecture (CLAUDE.md "Next, in order"). This is the bridge
+Task 1 of the architecture (the project notes "Next, in order"). This is the bridge
 between a 2-D optic flow field (eventually from MuJoCo-rendered image pairs;
 for now, synthetic flow fields analogous to `flyguard.stimuli`) and real
 T4/T5 neurons: `column_assignment.csv` gives each T4/T5 neuron's retinotopic
@@ -12,10 +12,10 @@ real synaptic wiring extracted by `flyguard.extract` (T4/T5 -> LPLC2, see
 compute each individual T4/T5 neuron's firing drive from its own column
 position and subtype tuning.
 
-Direction mapping (CLAUDE.md "RESOLVED"): a=front-to-back, b=back-to-front,
+Direction mapping (the project notes "RESOLVED"): a=front-to-back, b=back-to-front,
 c=upward, d=downward.
 
-**Stated assumption, not yet validated (CLAUDE.md "Remaining open item")**:
+**Stated assumption, not yet validated (the project notes "Remaining open item")**:
 this module fixes a world/image-plane convention --
 
     +x column coordinate = front (rostral) of the visual field
@@ -146,13 +146,13 @@ def encode_i_ext(
     T4/T5 neurons not present in `columns` (e.g. because `column_assignment`
     doesn't cover every reconstructed neuron) or not present in the
     subnetwork get zero drive. `peak_weight` scales drive=1 to a synapse
-    -equivalent weight; CLAUDE.md's "Known gotcha" puts the useful range at
+    -equivalent weight; the project notes' "Known gotcha" puts the useful range at
     20-40 per neuron -- but that number is calibrated for a *Poisson
     impulse* (`net.poisson`/`force_spike`-style), not a value re-injected as
     `i_ext` on every single step. Feeding this vector in unchanged at every
     `net.step()` bypasses the exponential synaptic decay entirely and
     saturates most driven neurons regardless of the fine-grained drive
-    differences between conditions (see CLAUDE.md pilot finding on the
+    differences between conditions (see the project notes pilot finding on the
     encoder). Use `poisson_stim_fn` below to drive a real LIFNetwork
     correctly; this function is the lower-level per-condition primitive it
     is built on.
@@ -212,7 +212,7 @@ def poisson_stim_fn(
 
 
 # ---------------------------------------------------------------------------
-# Real-image encoder: rendered pixels -> per-column flow (CLAUDE.md's
+# Real-image encoder: rendered pixels -> per-column flow (the project notes'
 # repeatedly-deferred "real optic-flow-from-image-pair" step). Everything
 # above this point works on synthetic flow fields; everything below maps
 # `flyguard.optical_flow`'s pixel-space flow onto real T4/T5 columns so it

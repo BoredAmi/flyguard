@@ -90,7 +90,7 @@ def extract(data_dir: Path, out: Path, types=None, hops=1, min_syn=5,
     growth the subnetwork is filtered back down to that side plus any
     midline ("center") neurons, dropping the few cross-hemisphere synapses
     `grow()` would otherwise pull in. This is the per-hemisphere
-    replication control (CLAUDE.md) -- FAFB is a single fly, so any result
+    replication control (the project notes) -- FAFB is a single fly, so any result
     could be an artefact of one animal's specific reconstruction; running
     the same experiment on each hemisphere's largely-independent circuit
     checks whether an effect is structural or a one-sided fluke.
@@ -161,7 +161,7 @@ def subset_subnetwork(W, meta, types):
     """Restrict an already-loaded subnetwork to just the given cell types
     and the real synapses directly among them -- no re-growth, no fresh
     Codex extraction. This is how the ~300-neuron "core control circuit"
-    (LPLC2 + LC4 + DNp01, see CLAUDE.md "Real-data performance") is built
+    (LPLC2 + LC4 + DNp01, see the project notes "Real-data performance") is built
     for the ROS2 node: the full periphery subnetwork (`data/looming.npz`,
     18k neurons, 0.8x realtime) is too slow for a live control loop, but
     restricting it down to just the looming-detector and escape-command

@@ -4,7 +4,7 @@ Before this module the same circuit was constructed three separate times --
 in `flyguard.avoid.ConnectomeController`, in the ROS2 `looming_node`, and in
 `flyguard.record_live_demo` -- each repeating the cell-type selection, the
 index bookkeeping, the dual-channel Poisson drive and the population-rate
-readout. CLAUDE.md carried a standing warning to keep them in sync by hand.
+readout. the project notes carried a standing warning to keep them in sync by hand.
 They now all call this.
 
 ## What the circuit is
@@ -38,7 +38,7 @@ the same scheme `flyguard.stimuli.simulate_condition` validated on the
 abstract ring circuit.
 
 Drive is delivered as discrete Poisson impulses, never as a constant `i_ext`
-held across steps. See CLAUDE.md's "Known gotcha": the 20-40 peak-weight
+held across steps. See the project notes' "Known gotcha": the 20-40 peak-weight
 range is calibrated for an impulse, and re-injecting a static current every
 step silently saturates the network at its refractory ceiling.
 
@@ -292,7 +292,7 @@ class CoreCircuit:
         if self.bilateral:
             # Order matters: left then right, LPLC2 then LPi within each side.
             # This is the exact sequence of Poisson draws the closed-loop
-            # benchmark in CLAUDE.md was measured on; changing it reshuffles
+            # benchmark in the project notes was measured on; changing it reshuffles
             # the random stream and silently moves every published number.
             pools = [
                 (self._idx[f"LPLC2:{s}"], rates[s], self._idx[f"LPi:{s}"]) for s in SIDES

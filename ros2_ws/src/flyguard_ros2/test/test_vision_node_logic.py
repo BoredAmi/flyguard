@@ -76,12 +76,12 @@ def test_drive_normalization_translation_mean_is_low():
     sum near 0, not the ~0.35-0.65 the old single-ended (sum / max)
     version gave live.
     """
-    normalized = _normalize(400.9)  # measured translation mean, see CLAUDE.md
+    normalized = _normalize(400.9)  # measured translation mean, see the project notes
     assert normalized < 0.05
 
 
 def test_drive_normalization_looming_mean_is_high():
-    normalized = _normalize(566.3)  # measured looming mean, see CLAUDE.md
+    normalized = _normalize(566.3)  # measured looming mean, see the project notes
     assert normalized > 0.95
 
 

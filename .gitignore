@@ -6,6 +6,7 @@
 # regenerates in seconds to a couple of minutes -- see README "Reproduce".
 data/*.npz
 data/avoid_recording.json
+data/rec_*.json
 
 # data/looming.npz is the exception and IS committed: ~1 MB, and it means
 # nobody has to download 200 MB of Codex CSVs to run the detector.
@@ -39,12 +40,6 @@ dist/
 venv/
 .mypy_cache/
 .ruff_cache/
-
-# --- Assistant / local working files ---------------------------------------
-# Project notes for an AI coding assistant. Useful locally, not part of the
-# published package.
-CLAUDE.md
-.claude/
 
 # --- Editors / OS ----------------------------------------------------------
 .vscode/

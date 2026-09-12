@@ -1,4 +1,4 @@
-"""Numeric sanity check for the MuJoCo world (CLAUDE.md layer 2): confirms
+"""Numeric sanity check for the MuJoCo world (the project's layer 2): confirms
 looming trials expand and translation trials don't, from the rendered
 pixels themselves rather than by visual inspection. Every trial in the
 dataset is checked, not just one hand-picked example.

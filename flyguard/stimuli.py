@@ -1,17 +1,17 @@
 """Synthetic optic-flow stimuli and the radial-motion-opponency test.
 
-Layer 1 of the architecture (see CLAUDE.md): pure numpy, no connectome, no
+Layer 1 of the architecture (see the project notes): pure numpy, no connectome, no
 MuJoCo. This tests the core hypothesis -- that LPLC2's four-arm radial
 motion opponency discriminates looming from self-motion translation --
 *before* any image encoder or rendering is involved.
 
 Channel naming: T4/T5 subtypes a/b/c/d each prefer one cardinal direction.
-The a/b/c/d -> direction mapping is now resolved (CLAUDE.md "RESOLVED"):
+The a/b/c/d -> direction mapping is now resolved (the project notes "RESOLVED"):
 a=front-to-back, b=back-to-front, c=upward, d=downward. This module's ring
 model is still a 1-D abstraction (four evenly-spaced channels at arbitrary
 angles 0/90/180/270), not a real 2-D visual field, so the angle assignment
 below is a bookkeeping choice, not a geometric claim -- but the *labels* are
-now the real subtype letters rather than placeholders. Per CLAUDE.md, the
+now the real subtype letters rather than placeholders. Per the project notes, the
 front-to-back/up/down convention is body-centric and it is not yet confirmed
 whether it is mirrored between the left and right optic lobe; that is
 settled by the per-hemisphere replication test, not assumed here.
@@ -39,7 +39,7 @@ import scipy.sparse as sp
 from flyguard.lif import LIFNetwork, LIFParams, rates
 
 # T4/T5 subtype letters, four evenly spaced channels in the ring model.
-# Direction labels per CLAUDE.md "RESOLVED -- a/b/c/d to cardinal direction
+# Direction labels per the project notes "RESOLVED -- a/b/c/d to cardinal direction
 # mapping" (Maisak et al. 2013, via Fisher et al. and others citing it
 # directly). Angle assignment (0/90/180/270) is an arbitrary but fixed
 # bookkeeping choice for this abstraction, not a geometric claim.
@@ -137,7 +137,7 @@ def build_opponency_network(w_exc: float = 8.0, w_inh: float = 8.0):
     Each T4T5_k / LPi_k neuron stands in for one arm's local population
     (already pooled by `arm_responses`), not an individual real neuron.
     Weights are chosen so that all four arms firing in agreement (~4*w_exc)
-    clears the ~26-synapse / 7 mV threshold (see CLAUDE.md "Known gotcha"),
+    clears the ~26-synapse / 7 mV threshold (see the project notes "Known gotcha"),
     while a single arm alone does not.
     """
     n = 9
@@ -171,7 +171,7 @@ def simulate_condition(
 
     `ablate_lpi=True` deletes the inhibitory LPi->LPLC2 connections
     (w_inh forced to 0) -- the "delete a cell type, see what breaks"
-    ablation from CLAUDE.md task 5. Without opponency, LPLC2 should lose
+    ablation from the project's task 5. Without opponency, LPLC2 should lose
     its ability to discriminate looming from translation/noise and fire at
     (almost) everything with coherent local motion.
     """

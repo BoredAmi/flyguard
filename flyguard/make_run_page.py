@@ -6,7 +6,7 @@ comes from `avoid.run_trial` -- the same code path the benchmark measures.
 
 Usage:
     MUJOCO_GL=egl python -m flyguard.record_avoid_demo --out avoid_recording.json
-    python -m flyguard.make_avoid_artifact --recording avoid_recording.json \\
+    python -m flyguard.make_run_page --recording avoid_recording.json \\
         --out docs/corridor_run.html
 """
 
@@ -16,7 +16,7 @@ import argparse
 import json
 from pathlib import Path
 
-TEMPLATE = Path(__file__).with_name("avoid_artifact_template.html")
+TEMPLATE = Path(__file__).with_name("run_page_template.html")
 PLACEHOLDER = "/*__DATA__*/"
 
 
@@ -39,7 +39,7 @@ def build(recording: Path, template: Path, out: Path) -> Path:
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--recording", type=Path, default=Path("avoid_recording.json"))
+    ap.add_argument("--recording", type=Path, default=Path("data/avoid_recording.json"))
     ap.add_argument("--template", type=Path, default=TEMPLATE)
     ap.add_argument("--out", type=Path, default=Path("docs/corridor_run.html"))
     a = ap.parse_args()

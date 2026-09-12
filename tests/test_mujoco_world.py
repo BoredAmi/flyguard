@@ -63,7 +63,7 @@ def test_matched_depth_trial_params_same_depth_both_conditions():
     image-based encoder: make_trial_params draws looming/translation from
     different depth ranges, inflating translation's apparent object size
     and reversing discrimination in a size-sensitive drive scheme (see
-    CLAUDE.md "Pilot findings"). matched_depth_trial_params must give both
+    the project notes "Pilot findings"). matched_depth_trial_params must give both
     conditions the identical starting depth."""
     loom = matched_depth_trial_params("looming", seed=1, depth0=5.0)
     trans = matched_depth_trial_params("translation", seed=1, depth0=5.0)

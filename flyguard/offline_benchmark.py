@@ -1,4 +1,4 @@
-"""Offline benchmark (CLAUDE.md layer 3): replay a shared set of trials
+"""Offline benchmark (the project's layer 3): replay a shared set of trials
 through all three detectors and report one accuracy/latency comparison.
 All three detection pipelines already exist and are individually validated
 (`validate_encoder.py`, `validate_baseline_tau.py`, `validate_baseline_cnn.py`)
@@ -9,7 +9,7 @@ the CNN run on the same real rendered MuJoCo pixels generated for this
 benchmark. The connectome/LIF detector does **not** yet -- the retinotopic
 encoder still only consumes synthetic flow fields matching a trial's known
 *condition* (`expanding_flow_2d` / `translational_flow_2d`), not flow
-estimated from the rendered frames themselves (see CLAUDE.md "Remaining
+estimated from the rendered frames themselves (see the project notes "Remaining
 open item" / task 4 note). Building a real image-pixel -> T4/T5-column flow
 estimator is future work, not something to improvise here under time
 pressure -- so the connectome row of this benchmark reuses the already

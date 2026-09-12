@@ -1,4 +1,4 @@
-"""Real-data validation of the retinotopic encoder (CLAUDE.md task 1).
+"""Real-data validation of the retinotopic encoder (the project's task 1).
 
 Drives the REAL T4/T5 neurons in the extracted subnetwork (not the abstract
 9-neuron ring circuit in `flyguard.stimuli`) with synthetic looming and
@@ -8,14 +8,14 @@ checks whether radial motion opponency, proven exactly on the idealized
 ring model, survives contact with the real, unevenly-weighted, recurrent
 connectome.
 
-Requires the raw `column_assignment.csv` (not committed -- see CLAUDE.md
+Requires the raw `column_assignment.csv` (not committed -- see the project notes
 "Actual Codex file schema"), pointed to via `--columns`.
 
 Usage:
     python -m flyguard.validate_encoder --npz data/looming.npz \
         --columns ~/flywire/column_assignment.csv --side right
 
-    # per-hemisphere replication control, fine heading resolution (CLAUDE.md
+    # per-hemisphere replication control, fine heading resolution (the project notes
     # "Pilot findings" FOLLOW-UP -- regenerates the two-hemisphere chart data):
     python -m flyguard.validate_encoder --npz data/looming.npz \
         --columns ~/flywire/column_assignment.csv --both-sides --heading-step 15

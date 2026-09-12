@@ -1,4 +1,4 @@
-"""Lee's tau baseline (CLAUDE.md task 4): classical time-to-contact from
+"""Lee's tau baseline (the project's task 4): classical time-to-contact from
 optic flow divergence, as a non-connectome comparison point for the LIF
 detector's discrimination behaviour.
 

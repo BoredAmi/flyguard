@@ -216,6 +216,28 @@ def collides(state: AgentState, obstacles: np.ndarray, cfg: ArenaConfig) -> bool
     return clearance(state, obstacles, cfg) <= 0.0
 
 
+def collision_kind(state: AgentState, obstacles: np.ndarray,
+                   cfg: ArenaConfig) -> str:
+    """Which surface the agent is in contact with: "obstacle", "wall" or "none".
+
+    Worth separating, because the two failures mean different things. Hitting a
+    pillar is a detection failure: the thing was there to be seen and the
+    controller drove into it. Hitting a corridor wall usually is not -- it is
+    what happens when a controller commits a turn and then never corrects,
+    which this arena was widened specifically to stop being the thing under
+    measurement (see `ArenaConfig`).
+    """
+    gap_wall = float(cfg.lane_half_width - cfg.agent_radius - abs(state.y))
+    if len(obstacles):
+        d = np.hypot(obstacles[:, 0] - state.x, obstacles[:, 1] - state.y)
+        gap_obst = float(d.min() - cfg.obstacle_radius - cfg.agent_radius)
+    else:
+        gap_obst = float("inf")
+    if min(gap_obst, gap_wall) > 0.0:
+        return "none"
+    return "obstacle" if gap_obst <= gap_wall else "wall"
+
+
 class ArenaRenderer:
     """Holds the compiled model and an EGL renderer for one arena."""
 

@@ -5,7 +5,7 @@ the real extracted subnetwork's T4/T5 columns with that flow (not a
 synthetic ground-truth flow field), and measure whether LPLC2 still
 discriminates looming from translation.
 
-This is the step CLAUDE.md flagged and deferred at every prior opportunity
+This is the step the project notes flagged and deferred at every prior opportunity
 (the offline benchmark's LIF row, the ROS2 node's `lplc2_drive` input) --
 finally closing the loop from rendered pixels to the real connectome,
 rather than from a trial's known ground-truth condition.
@@ -27,7 +27,7 @@ more boundary/edge pixels with detectable optical flow, hence more driven
 T4/T5 columns, independent of the actual motion pattern. Lee's tau and the
 CNN aren't affected by this (tau's formula divides out absolute size; the
 CNN's own shortcut check already confirmed it isn't using size), but this
-encoder's raw-pixel-evidence drive scheme is. See CLAUDE.md "Pilot
+encoder's raw-pixel-evidence drive scheme is. See the project notes "Pilot
 findings" for the full diagnosis and the controlled result once depth is
 matched.
 

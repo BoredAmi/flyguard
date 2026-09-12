@@ -1,4 +1,4 @@
-"""Ablation study on the real extracted connectome (CLAUDE.md task 5):
+"""Ablation study on the real extracted connectome (the project's task 5):
 delete individual cell types from the wiring matrix and measure what
 breaks in looming-vs-translation discrimination. Extends the abstract
 ring-circuit LPi ablation already proven in `flyguard.stimuli`

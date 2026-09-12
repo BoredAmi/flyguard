@@ -1,4 +1,4 @@
-"""Validates the Lee's-tau baseline against ground truth (CLAUDE.md task 4).
+"""Validates the Lee's-tau baseline against ground truth (the project's task 4).
 
 Two things get checked numerically, not by eye:
 
@@ -59,7 +59,7 @@ def specificity_check(warning_threshold_s: float = 3.0):
     """"Finite" is the wrong bar for a false alarm: quantization noise on an
     essentially-constant apparent size produces plenty of technically-finite
     tau values, but they're huge (tens to tens-of-thousands of seconds --
-    see the raw trace in this module's docstring history / CLAUDE.md).
+    see the raw trace in this module's docstring history / the project notes).
     A real system acts on tau dropping *below* some warning threshold, not
     on mere finiteness -- so that's what gets checked here. Threshold
     default (3s) matches the true time-to-contact range of the looming

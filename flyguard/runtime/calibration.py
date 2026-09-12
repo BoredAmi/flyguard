@@ -4,7 +4,7 @@ Four numbers stand between a working detector and a useless one, and none of
 them can be guessed -- they depend on the camera's field of view, the
 resolution, the texture of the world and how fast the vehicle moves. They are
 measured, never hand-picked, and getting that wrong was instructive twice
-over (both failures are on record in CLAUDE.md):
+over (both failures are on record in the project notes):
 
 * `drive_center` comes from an **unobstructed** view -- "what open space
   looks like" -- so that ordinary cruising sits at drive ~0.5 and LPi's

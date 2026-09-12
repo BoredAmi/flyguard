@@ -7,7 +7,7 @@ exercising or profiling it with a scripted input (`demo_stimulus_node`).
 
 Runs a ~530-neuron "core control circuit" (LPLC2 + LC4 + all real LPi
 subtypes + DNp01, real synapses only -- see
-`flyguard.extract.subset_subnetwork` and CLAUDE.md "Real-data
+`flyguard.extract.subset_subnetwork` and the project notes "Real-data
 performance") as a persistent LIF simulation and publishes `/cmd_vel`.
 
 Why this specific circuit, and not the full periphery: the full extracted
@@ -39,7 +39,7 @@ real inhibitory synapses (`LPi -> LPLC2`, 989 edges, -11124 weight, same
 numbers as everywhere else in this project) that keep the circuit from
 just staying maximally excited.
 
-**Why only an e-stop, not steering.** CLAUDE.md's cell-type table lists
+**Why only an e-stop, not steering.** the project notes' cell-type table lists
 DNa01/DNa02 (steering) and MDN (reverse) as robot analogues for LPLC2/LC4's
 downstream targets, but the actual extracted connectivity
 (`data/looming.npz`, hops=1) shows LPLC2/LC4 project directly and purely

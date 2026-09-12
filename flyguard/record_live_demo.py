@@ -8,7 +8,7 @@ dual-channel LPLC2/LPi drive, DNp01 e-stop latch, the same
 `DRIVE_SUM_LOW`/`DRIVE_SUM_HIGH` calibration) but runs it in one Python
 process instead of over ROS2 topics, purely to capture a rich multi-modal
 recording for offline visualization -- the ROS2 nodes already
-independently prove the live messaging wiring works (see CLAUDE.md "Pilot
+independently prove the live messaging wiring works (see the project notes "Pilot
 findings"). If this script's logic and the ROS2 nodes' logic ever drift
 apart, the recording stops being an honest representation of what the
 live system does; keep them in sync by hand until there's a shared module
@@ -45,7 +45,7 @@ from flyguard.runtime.circuit import BASE_CORE_TYPES
 import mujoco  # noqa: E402
 
 CORE_TYPES = list(BASE_CORE_TYPES)
-# Same empirical two-point calibration as vision_node.py -- see CLAUDE.md
+# Same empirical two-point calibration as vision_node.py -- see the project notes
 # "Pilot findings" for why a single-ended normaliser broke the live e-stop.
 DRIVE_SUM_LOW = 400.0
 DRIVE_SUM_HIGH = 570.0

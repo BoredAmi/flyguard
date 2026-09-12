@@ -64,6 +64,7 @@ import numpy as np
 from flyguard.paths import default_columns_path
 from flyguard.arena import (
     AgentState,
+    collision_kind,
     ArenaConfig,
     ArenaRenderer,
     clearance,
@@ -287,7 +288,35 @@ class TrialResult:
     path_length: float
     min_clearance: float
     n_estop_ticks: int
+    #: "obstacle", "wall" or "none" -- a pillar strike is a detection failure,
+    #: a wall strike is usually a steering one. See `arena.collision_kind`.
+    collision_kind: str = "none"
+    final_y: float = 0.0
+    final_heading_deg: float = 0.0
     telemetry: list = field(default_factory=list)
+
+
+def _result(controller, cfg, state, collided, reached_goal, ticks, path_length,
+            min_clear, n_estop, obstacles, telemetry) -> TrialResult:
+    """Assemble a TrialResult, recording *what* was hit as well as that
+    something was. Keyword arguments throughout, because the field list has
+    grown once already and positional calls silently shift on the next change.
+    """
+    return TrialResult(
+        controller=controller.name,
+        arena_seed=cfg.seed,
+        collided=collided,
+        reached_goal=reached_goal,
+        ticks=ticks,
+        progress_x=state.x,
+        path_length=path_length,
+        min_clearance=min_clear,
+        n_estop_ticks=n_estop,
+        collision_kind=collision_kind(state, obstacles, cfg) if collided else "none",
+        final_y=state.y,
+        final_heading_deg=math.degrees(state.heading),
+        telemetry=telemetry,
+    )
 
 
 def run_trial(controller, cfg: ArenaConfig, encoder: BilateralEncoder | None,
@@ -354,17 +383,17 @@ def run_trial(controller, cfg: ArenaConfig, encoder: BilateralEncoder | None,
             min_clear = min(min_clear, clearance(state, obstacles, cfg))
 
             if collides(state, obstacles, cfg):
-                return TrialResult(controller.name, cfg.seed, True, False, tick + 1,
-                                   state.x, path_length, min_clear, n_estop, telemetry)
+                return _result(controller, cfg, state, True, False, tick + 1,
+                               path_length, min_clear, n_estop, obstacles, telemetry)
             if state.x >= cfg.goal_x:
-                return TrialResult(controller.name, cfg.seed, False, True, tick + 1,
-                                   state.x, path_length, min_clear, n_estop, telemetry)
+                return _result(controller, cfg, state, False, True, tick + 1,
+                               path_length, min_clear, n_estop, obstacles, telemetry)
     finally:
         if renderer is not None:
             renderer.close()
 
-    return TrialResult(controller.name, cfg.seed, False, False, max_ticks,
-                       state.x, path_length, min_clear, n_estop, telemetry)
+    return _result(controller, cfg, state, False, False, max_ticks,
+                   path_length, min_clear, n_estop, obstacles, telemetry)
 
 
 def step_agent_clamped(state: AgentState, v: float, omega: float, dt: float,
@@ -602,7 +631,8 @@ def main(columns_csv: Path, n_arenas: int, resolution: int, tick_hz: float,
             print(f"  {name:11s} arena {cfg.seed:3d}  "
                   f"{'COLLIDED' if r.collided else ('goal' if r.reached_goal else 'timeout'):8s}  "
                   f"x={r.progress_x:5.1f}/{cfg.goal_x:.0f}  min_clear={r.min_clearance:5.2f}  "
-                  f"estop_ticks={r.n_estop_ticks}")
+                  f"estop_ticks={r.n_estop_ticks}"
+                  + (f"  hit={r.collision_kind} (y={r.final_y:+.1f})" if r.collided else ""))
         elapsed = time.time() - t0
         n = len(rows)
         results[name] = {
@@ -612,16 +642,26 @@ def main(columns_csv: Path, n_arenas: int, resolution: int, tick_hz: float,
             "mean_progress_x": float(np.mean([r.progress_x for r in rows])),
             "mean_min_clearance": float(np.mean([r.min_clearance for r in rows])),
             "mean_estop_ticks": float(np.mean([r.n_estop_ticks for r in rows])),
+            # Split the collisions, because the two mean different things: a
+            # pillar strike is a detection failure, a wall strike is a steering
+            # one -- a controller that committed a turn and never corrected.
+            "wall_collisions": sum(r.collision_kind == "wall" for r in rows),
+            "obstacle_collisions": sum(r.collision_kind == "obstacle" for r in rows),
             "seconds": round(elapsed, 1),
             "per_arena": [r.__dict__ for r in rows],
         }
         for row in results[name]["per_arena"]:
             row.pop("telemetry", None)
 
-    print(f"\n{'controller':12s} {'collision':>10s} {'goal':>8s} {'mean x':>8s} {'min clear':>10s}")
+    print(f"\n{'controller':12s} {'collision':>10s} {'goal':>8s} {'mean x':>8s} "
+          f"{'min clear':>10s} {'wall':>6s} {'obst':>6s}")
     for name, r in results.items():
         print(f"{name:12s} {r['collision_rate']:10.2f} {r['goal_rate']:8.2f} "
-              f"{r['mean_progress_x']:8.1f} {r['mean_min_clearance']:10.2f}")
+              f"{r['mean_progress_x']:8.1f} {r['mean_min_clearance']:10.2f} "
+              f"{r['wall_collisions']:6d} {r['obstacle_collisions']:6d}")
+    print("\nwall / obst split the collision column. A wall strike usually means the\n"
+          "controller committed a turn and never corrected, not that it failed to see\n"
+          "an obstacle -- the corridor is 8 m wide and every arena is passable.")
 
     bundle = {"config": {"n_arenas": n_arenas, "resolution": resolution, "tick_hz": tick_hz,
                           "disable_escape": disable_escape,

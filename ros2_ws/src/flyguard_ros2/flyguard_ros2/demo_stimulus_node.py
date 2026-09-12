@@ -3,7 +3,7 @@ Companion demo node: publishes a scripted `flyguard/lplc2_drive` signal.
 
 Exists so `looming_node` can be exercised and demoed without a camera or
 MuJoCo wired in yet (the real image-based encoder is still future work --
-see CLAUDE.md). Not a vision pipeline -- it reuses
+see the project notes). Not a vision pipeline -- it reuses
 `flyguard.stimuli`'s already-validated radial-opponency computation
 (`arm_responses`/`net_opponency_drive`), alternating "cruise" (pure
 translation, opponency drive ~0) and "looming event" (pure expansion,

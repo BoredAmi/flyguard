@@ -18,7 +18,7 @@ same speed and the same kind of scene the robot will actually fly in.
 
 Every constant here is a threshold, and a threshold needs a reference. The
 split between them is not arbitrary -- it was measured, and getting it wrong
-broke the controller in both directions (CLAUDE.md records both failures):
+broke the controller in both directions (the project notes record both failures):
 
 * `drive_center`, `turn_offset` and `saccade_threshold` come from the
   **clear** recording, because with nothing ahead every signal the pipeline

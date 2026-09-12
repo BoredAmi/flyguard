@@ -1,4 +1,4 @@
-"""Trains and validates the CNN baseline (CLAUDE.md task 4, second half).
+"""Trains and validates the CNN baseline (the project's task 4, second half).
 
 Generates train/val/test MuJoCo datasets (independent seeds -- no trial
 overlap), trains `TinyLoomNet`, and checks three things numerically:

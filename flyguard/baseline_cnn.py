@@ -1,4 +1,4 @@
-"""A small trained CNN baseline (CLAUDE.md task 4), second comparison point
+"""A small trained CNN baseline (the project's task 4), second comparison point
 alongside Lee's tau. Unlike the connectome-derived detector and unlike tau,
 this one is deliberately a **learned** model -- the point of the comparison
 is "what does training buy you over a zero-parameter geometric cue or an

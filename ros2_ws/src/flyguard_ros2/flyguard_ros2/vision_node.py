@@ -14,7 +14,7 @@ T4/T5 column population (`flyguard.encoder.flow_from_frame_pair` +
 `flyguard.stimuli.net_opponency_drive` demo_stimulus_node computes from
 synthetic ground-truth flow. This is `flyguard/validate_real_encoder.py`'s
 methodology wired into the live control loop, in the "feed pre-computed
-optic flow features directly into LPLC2, skipping T4/T5" mode CLAUDE.md's
+optic flow features directly into LPLC2, skipping T4/T5" mode the project notes'
 hardware-constraints note calls for -- the T4/T5 population is used only
 to compute a flow-driven scalar here (no connectome simulation at this
 stage; that happens downstream, in looming_node's own small real circuit).
@@ -22,7 +22,7 @@ Measured cost on the reference machine: ~44 ms/tick (render + flow) at
 128px, comfortably sustaining this node's default 15 Hz.
 
 **Expect a weaker, noisier signal than `demo_stimulus_node`'s scripted
-version -- this is not a bug to chase.** CLAUDE.md's "Pilot findings"
+version -- this is not a bug to chase.** the project notes' "Pilot findings"
 documents why: real pixel flow exists only near a rendered object's own
 silhouette boundary, not across the whole visual field the synthetic flow
 generators assumed, and the measured discrimination margin is real but
@@ -114,7 +114,7 @@ class VisionNode(Node):
         if not columns_csv.exists():
             raise RuntimeError(
                 f"column_assignment.csv not found at {columns_csv} -- the raw Codex CSVs "
-                f"are not committed (see CLAUDE.md); pass --ros-args -p columns_csv:=<path>"
+                f"are not committed (see the project notes); pass --ros-args -p columns_csv:=<path>"
             )
         self.get_logger().info(f"loading T4/T5 columns from {columns_csv}")
         self.columns = load_column_assignment(columns_csv, side=side)
