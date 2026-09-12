@@ -48,6 +48,20 @@ def bilateral_turn(signal_left: float, signal_right: float, eps: float = 1e-6) -
     return float((signal_right - signal_left) / (total + eps))
 
 
+def ema_trace(values, alpha: float) -> list[float]:
+    """Exponential moving average, one trial's worth at a time, starting from
+    zero. Pure and stateless so calibration can measure the same statistic
+    `SaccadicSteering` accumulates online, without re-deriving it by hand and
+    risking the two drifting apart.
+    """
+    ema = 0.0
+    out = []
+    for x in values:
+        ema = alpha * float(x) + (1.0 - alpha) * ema
+        out.append(ema)
+    return out
+
+
 def as_sides(value) -> dict:
     """Accept either one number or a {'left':..., 'right':...} mapping."""
     if hasattr(value, "keys"):
@@ -94,12 +108,40 @@ class SaccadicSteering:
     the next saccade, and the agent oscillated between -37 and +46 degrees
     while braking.
 
-    Three of the constants are *calibrated* from measurements rather than
-    chosen (`turn_offset`, `saccade_threshold`, `estop_threshold` -- see
-    `flyguard.runtime.calibration`). The rest -- cruise speed, saccade rate
-    and duration, refractory period -- are ordinary robot-controller
-    constants. They are not claims about the fly, and the connectome path
-    still contains no fitted parameter.
+    Four of the constants are *calibrated* from measurements rather than
+    chosen (`turn_offset`, `saccade_threshold`, `turn_ema_threshold`,
+    `estop_threshold` -- see `flyguard.runtime.calibration`). The rest --
+    cruise speed, saccade rate and duration, refractory period, the EMA's
+    own smoothing factor -- are ordinary robot-controller constants. They
+    are not claims about the fly, and the connectome path still contains no
+    fitted parameter.
+
+    **`turn_ema_threshold` exists because of a real, diagnosed failure, not
+    speculatively.** `diagnose_trial.py --arena 9 --controller connectome`
+    showed a trial that collided with a corridor wall while the turn signal
+    stayed the right sign (turning away from the wall) for the entire
+    8-second approach, but only ever reached 0.01-0.10 against a calibrated
+    `saccade_threshold` of 0.096 -- two ticks out of 82 crossed it, both too
+    late. The escape channel could not help either: DNp01 sat pinned at
+    exactly 87.0 spikes/tick the whole trial, one below its 88.0 threshold
+    (see `runtime.circuit` and the DNp01-saturation finding elsewhere in
+    this project) -- consistent, not a coincidence, since that channel was
+    already known to carry no graded distance information. So a *sustained*
+    weak bias produced no correction at all, from either channel, until
+    contact.
+
+    `bilateral_turn`'s instantaneous threshold is deliberately strict --
+    it's a noise floor, calibrated so a single noisy tick can't fire a
+    saccade. But seven straight seconds of the same sign is not noise; a
+    symmetric noise process would not stay positive that long. The EMA
+    tracks exactly that: it accumulates evidence the instantaneous check
+    discards, and fires once the *smoothed* signal -- not any single tick --
+    clears its own, separately calibrated noise floor. It is a second,
+    independent trigger alongside the instantaneous one, not a replacement:
+    an isolated strong tick (a pillar suddenly filling one hemifield) still
+    fires immediately through `saccade_threshold`, and a weak-but-persistent
+    bias (a wall approached at a shallow angle) now also fires, later than
+    an instant response would but before it otherwise never would at all.
     """
 
     def __init__(
@@ -114,6 +156,8 @@ class SaccadicSteering:
         turn_offset: float = 0.0,
         saccade_threshold: float = float("inf"),
         estop_threshold: float = float("inf"),
+        turn_ema_alpha: float = 0.2,
+        turn_ema_threshold: float = float("inf"),
     ):
         self.v_cruise = float(v_cruise)
         self.v_escape = float(v_escape)
@@ -124,6 +168,8 @@ class SaccadicSteering:
         self.turn_offset = float(turn_offset)
         self.saccade_threshold = float(saccade_threshold)
         self.estop_threshold = float(estop_threshold)
+        self.turn_ema_alpha = float(turn_ema_alpha)
+        self.turn_ema_threshold = float(turn_ema_threshold)
         self.reset()
 
     def reset(self) -> None:
@@ -131,6 +177,7 @@ class SaccadicSteering:
         self._saccade_until = -1.0
         self._refractory_until = -1.0
         self._saccade_omega = 0.0
+        self._turn_ema = 0.0
 
     def cruise(self) -> Command:
         """The command issued before any percept exists (first frame, or a
@@ -149,36 +196,64 @@ class SaccadicSteering:
             self._estop_until = t + self.estop_cooldown_s
         estop = t < self._estop_until
 
+        # Accumulate evidence only while vision is trustworthy -- the same
+        # gate the instantaneous check uses -- so saccadic and post-saccade
+        # rotational flow never enters the average, only untainted straight-
+        # segment signal does.
+        if vision_valid:
+            self._turn_ema = self.turn_ema_alpha * turn + (1.0 - self.turn_ema_alpha) * self._turn_ema
+
+        turn_ema_for_telemetry = self._turn_ema
+
         if in_saccade:
             omega = self._saccade_omega
         else:
             omega = 0.0
-            # Two ways to start a saccade, because they cover different
-            # geometry. The left/right difference handles obstacles off to one
-            # side and is the strong cue. It is blind to an obstacle dead
-            # ahead, which by symmetry drives both hemispheres equally and
-            # leaves the difference at ~0 -- measured directly: an arena whose
-            # first obstacle sits near the corridor axis was struck head-on at
-            # exactly the same place as by the vision-free baseline.
+            # Three ways to start a saccade, because they cover different
+            # failure shapes. The left/right difference handles obstacles off
+            # to one side and is the strong, fast cue. It is blind to an
+            # obstacle dead ahead, which by symmetry drives both hemispheres
+            # equally and leaves the difference at ~0 -- measured directly: an
+            # arena whose first obstacle sits near the corridor axis was
+            # struck head-on at exactly the same place as by the vision-free
+            # baseline. It is also blind to a *sustained but weak* bias, which
+            # never spikes past the noise-floor threshold on any single tick
+            # even though it never changes sign either -- see the class
+            # docstring for the trial that diagnosed this. The EMA covers
+            # that second case: it fires only once several seconds of
+            # same-signed evidence clears its own noise floor, so a single
+            # noisy tick still cannot trigger it.
             #
-            # That frontal case is what the escape channel is for, and it is
+            # The frontal case is what the escape channel is for, and it is
             # the one this circuit's anatomy genuinely licenses: LPLC2 ->
             # DNp01 is a frontal-loom escape reflex. So an escape also commits
             # a turn, taking whatever weak side evidence exists to choose a
             # direction. Flies' escape turns are likewise directionally biased
             # rather than undirected.
             evidence = vision_valid and abs(turn) >= self.saccade_threshold
-            if evidence or fired_escape:
-                direction = turn if turn != 0.0 else 1.0
+            ema_evidence = vision_valid and abs(self._turn_ema) >= self.turn_ema_threshold
+            if evidence or ema_evidence or fired_escape:
+                if evidence:
+                    direction = turn if turn != 0.0 else 1.0
+                elif ema_evidence:
+                    direction = self._turn_ema
+                else:
+                    direction = turn if turn != 0.0 else 1.0
                 self._saccade_omega = math.copysign(self.saccade_rate, direction)
                 self._saccade_until = t + self.saccade_duration_s
                 self._refractory_until = self._saccade_until + self.refractory_s
                 omega = self._saccade_omega
+                # The saccade is the corrective action for whatever evidence
+                # just fired it -- start accumulating fresh rather than
+                # letting stale evidence combine with the next straight
+                # segment's own signal.
+                self._turn_ema = 0.0
 
         # Escape *brakes*; it does not seize the steering. That matches what
         # DNp01 licenses, and an earlier version that overrode omega with a
         # full-rate turn drove the agent into the nearest wall.
         telemetry.update({"turn_raw": turn_raw, "turn": turn, "estop_stat": estop_stat,
+                          "turn_ema": turn_ema_for_telemetry,
                           "saccade": bool(in_saccade or omega != 0.0)})
         return Command(v=self.v_escape if estop else self.v_cruise, omega=omega,
                        estop=estop, telemetry=telemetry)

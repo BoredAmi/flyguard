@@ -33,7 +33,8 @@ dev = ["pytest>=7.0", "matplotlib", "pyflakes"]
 mujoco = ["mujoco>=3.0"]          # the simulated corridor and stimulus renderer
 cnn = ["torch>=2.0"]              # the one baseline allowed to learn
 images = ["pillow>=9.0"]          # calibrating from a directory of image files
-all = ["flyguard[dev,mujoco,cnn,images]"]
+neuprint = ["neuprint-python>=0.4"]  # querying the male whole-CNS connectome (query_male_cns.py)
+all = ["flyguard[dev,mujoco,cnn,images,neuprint]"]
 
 [project.scripts]
 flyguard-calibrate = "flyguard.calibrate:main"

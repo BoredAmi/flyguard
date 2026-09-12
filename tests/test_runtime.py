@@ -20,6 +20,7 @@ from flyguard.runtime import (
     Percept,
     SaccadicSteering,
     bilateral_turn,
+    ema_trace,
     normalize_drive,
 )
 
@@ -256,6 +257,88 @@ def test_cruise_is_issued_before_any_percept_exists():
     s = _steering()
     cmd = s.cruise()
     assert cmd.omega == 0.0 and not cmd.estop and cmd.v == s.v_cruise
+
+
+# ---------------------------------------------------------------------------
+# turn_ema: the sustained-weak-bias trigger added after diagnose_trial found
+# a wall struck by a signal that stayed correctly signed for 7+ seconds but
+# never once crossed saccade_threshold on a single tick.
+# ---------------------------------------------------------------------------
+
+
+def test_ema_trace_matches_the_textbook_recurrence():
+    out = ema_trace([1.0, 1.0, 1.0], alpha=0.5)
+    assert out == pytest.approx([0.5, 0.75, 0.875])
+
+
+def test_ema_trace_starts_from_zero_each_call():
+    """Pure and stateless: calling it twice must not remember the first call,
+    the same guarantee `calibrate_controller` relies on per trial."""
+    first = ema_trace([1.0, 1.0], alpha=0.5)
+    second = ema_trace([1.0, 1.0], alpha=0.5)
+    assert first == second
+
+
+def test_weak_persistent_bias_triggers_via_ema_when_instant_never_fires():
+    """The exact shape diagnose_trial found: every single tick under
+    saccade_threshold, but the same sign for long enough that the smoothed
+    signal isn't."""
+    s = _steering(saccade_threshold=0.5, turn_ema_alpha=0.2, turn_ema_threshold=0.05)
+    omega = 0.0
+    for i in range(40):
+        cmd = s.step(0.08, 0.0, i * 0.1)
+        if cmd.omega != 0.0:
+            omega = cmd.omega
+            break
+    assert omega != 0.0, "a sustained sub-threshold bias should eventually fire a saccade"
+
+
+def test_symmetric_noise_never_accumulates_in_the_ema():
+    """A sign-alternating signal is what the instantaneous noise floor is
+    calibrated against; the EMA must not be more trigger-happy than that on
+    the same kind of noise."""
+    s = _steering(saccade_threshold=0.5, turn_ema_alpha=0.2, turn_ema_threshold=0.05)
+    for i in range(40):
+        turn = 0.08 if i % 2 == 0 else -0.08
+        cmd = s.step(turn, 0.0, i * 0.1)
+        assert cmd.omega == 0.0
+
+
+def test_ema_disabled_by_default_does_not_change_existing_behaviour():
+    """turn_ema_threshold defaults to inf, same convention as the other two
+    calibrated thresholds -- an uncalibrated controller must behave exactly
+    as it did before this was added."""
+    s = _steering(saccade_threshold=0.5)
+    for i in range(60):
+        assert s.step(0.08, 0.0, i * 0.1).omega == 0.0
+
+
+def test_ema_resets_after_it_fires_a_saccade():
+    s = _steering(saccade_threshold=0.5, turn_ema_alpha=0.5, turn_ema_threshold=0.05)
+    t = 0.0
+    fired = False
+    for i in range(20):
+        cmd = s.step(0.3, 0.0, t)
+        t += 0.1
+        if cmd.omega != 0.0 and not fired:
+            fired = True
+            # The tick right after a saccade completes and clears refractory
+            # should not immediately refire on stale accumulated evidence.
+            t = s._refractory_until + 0.01
+            post = s.step(0.0, 0.0, t)
+            assert post.telemetry["turn_ema"] == pytest.approx(0.0)
+            break
+    assert fired
+
+
+def test_ema_only_accumulates_while_vision_is_valid():
+    """Rotational flow during a saccade or its settling window is exactly
+    the contamination the instantaneous check is already gated against;
+    the running average must not ingest it either."""
+    s = _steering(saccade_threshold=0.5, turn_ema_alpha=0.9, turn_ema_threshold=0.05)
+    s.step(0.3, 0.0, 0.0)                       # commits a saccade
+    during = s.step(0.9, 0.0, 0.1)               # huge, but mid-saccade
+    assert during.telemetry["turn_ema"] == pytest.approx(0.0)
 
 
 # ---------------------------------------------------------------------------

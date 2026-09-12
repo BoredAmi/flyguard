@@ -34,6 +34,7 @@ from flyguard.runtime.steering import (
     SaccadicSteering,
     as_sides,
     bilateral_turn,
+    ema_trace,
     normalize_drive,
 )
 from flyguard.runtime.types import SIDES, Command, Percept
@@ -56,5 +57,6 @@ __all__ = [
     "image_to_array",
     "bilateral_turn",
     "default_npz_path",
+    "ema_trace",
     "normalize_drive",
 ]

@@ -46,19 +46,25 @@ from flyguard.avoid import (
 from flyguard.runtime import BilateralEncoder
 
 
-def _classify(rows: list, saccade_threshold: float) -> dict:
+def _classify(rows: list, saccade_threshold: float, turn_ema_threshold: float) -> dict:
     """Say which of the three failure shapes the trace matches."""
     turns = np.array([r["turn"] for r in rows if "turn" in r])
     if not len(turns):
         return {"verdict": "no vision ticks recorded"}
+    emas = np.array([r["turn_ema"] for r in rows if "turn_ema" in r])
     peak = float(np.max(np.abs(turns)))
+    peak_ema = float(np.max(np.abs(emas))) if len(emas) else 0.0
     n_over = int(np.sum(np.abs(turns) >= saccade_threshold))
+    n_over_ema = int(np.sum(np.abs(emas) >= turn_ema_threshold)) if len(emas) else 0
     return {
         "n_vision_ticks": len(turns),
         "peak_abs_turn": peak,
         "saccade_threshold": saccade_threshold,
         "ticks_over_threshold": n_over,
         "headroom": peak / saccade_threshold if saccade_threshold else float("inf"),
+        "peak_abs_turn_ema": peak_ema,
+        "turn_ema_threshold": turn_ema_threshold,
+        "ticks_over_ema_threshold": n_over_ema,
     }
 
 
@@ -93,6 +99,7 @@ def main() -> None:
                                   max_ticks=a.max_ticks)
         print(f"  turn_offset={cc['turn_offset']:+.4f}  "
               f"saccade_threshold={cc['saccade_threshold']:.4f}  "
+              f"turn_ema_threshold={cc['turn_ema_threshold']:.4f}  "
               f"estop_threshold={cc['estop_threshold']:.2f}")
 
     cfg = ArenaConfig(**{**template.__dict__, "seed": a.arena})
@@ -102,17 +109,23 @@ def main() -> None:
 
     rows = result.telemetry
     print(f"\n{'tick':>5} {'t':>5} {'x':>6} {'y':>6} {'head':>7} "
-          f"{'turn':>7} {'|turn|>thr':>10} {'estop_stat':>10} {'omega':>6}")
+          f"{'turn':>7} {'|turn|>thr':>10} {'turn_ema':>9} {'ema>thr':>8} "
+          f"{'estop_stat':>10} {'omega':>6}")
     thr = controller.saccade_threshold
+    ema_thr = controller.turn_ema_threshold
     for i, r in enumerate(rows):
         if i % a.every and i != len(rows) - 1:
             continue
         turn = r.get("turn")
+        ema = r.get("turn_ema")
         flag = "" if turn is None else ("YES" if abs(turn) >= thr else "-")
+        ema_flag = "" if ema is None else ("YES" if abs(ema) >= ema_thr else "-")
         print(f"{i:>5} {r['t']:>5.1f} {r['x']:>6.2f} {r['y']:>6.2f} "
               f"{math.degrees(r['heading']):>7.1f} "
               f"{('%+.3f' % turn) if turn is not None else '    -':>7} "
               f"{flag:>10} "
+              f"{('%+.3f' % ema) if ema is not None else '   -':>9} "
+              f"{ema_flag:>8} "
               f"{r.get('estop_stat', float('nan')):>10.1f} {r['omega']:>+6.2f}")
 
     kind = result.collision_kind
@@ -122,14 +135,18 @@ def main() -> None:
     print(f"wall clearance at the end: "
           f"{cfg.lane_half_width - cfg.agent_radius - abs(result.final_y):+.3f} m")
 
-    stats = _classify(rows, thr)
+    stats = _classify(rows, thr, ema_thr)
     print("\n--- why ---")
     for k, v in stats.items():
         print(f"  {k}: {v:.4f}" if isinstance(v, float) else f"  {k}: {v}")
-    if stats.get("ticks_over_threshold", 0) == 0:
-        print("  VERDICT: the turn signal never crossed its own noise floor. The\n"
-              "           steering law had nothing to act on -- this is a signal\n"
-              "           problem, not a control-gain problem.")
+    if stats.get("ticks_over_threshold", 0) == 0 and stats.get("ticks_over_ema_threshold", 0) == 0:
+        print("  VERDICT: the turn signal never crossed its own noise floor, on a\n"
+              "           single tick or smoothed. The steering law had nothing to\n"
+              "           act on -- this is a signal problem, not a control-gain one.")
+    elif stats.get("ticks_over_threshold", 0) == 0:
+        print("  VERDICT: no single tick crossed the instantaneous threshold, but the\n"
+              "           smoothed signal did -- a sustained weak bias, the case\n"
+              "           turn_ema_threshold exists for.")
     elif result.collided and kind == "wall":
         print("  VERDICT: the signal did cross threshold, so the steering law fired\n"
               "           but did not fire often or early enough to stay off the wall.")

@@ -79,6 +79,7 @@ from flyguard.runtime import (
     SaccadicSteering,
     as_sides,
     bilateral_turn,
+    ema_trace,
     normalize_drive,
 )
 from flyguard.runtime.circuit import BASE_CORE_TYPES
@@ -138,6 +139,13 @@ class _BilateralController:
       drives in a circle. The measured value is reported, not hidden.
     * `saccade_threshold` -- how much turn evidence is needed to commit to a
       turn, set from the signal's own noise floor in an empty corridor.
+    * `turn_ema_threshold` -- the same idea applied to a smoothed running
+      average of the turn signal rather than any single tick, so a weak but
+      *persistent* bias (measured: a wall struck after 7+ seconds of a
+      signal that never once cleared `saccade_threshold` but also never
+      changed sign) can still trigger a correction. See
+      `runtime.steering.SaccadicSteering`'s docstring for the diagnosed
+      trial this was added for.
     * `estop_threshold` -- the level the escape statistic must exceed. An
       escape that fires on almost every tick is not a detection, and
       `validate_arena` measures why it would: the absolute drive level sits
@@ -155,15 +163,15 @@ class _BilateralController:
     def __init__(self, drive_center, drive_scale: float, v_cruise: float = 1.0,
                  v_escape: float = 0.3, saccade_rate: float = 1.6,
                  saccade_duration_s: float = 0.3, refractory_s: float = 0.3,
-                 estop_cooldown_s: float = 0.4, **_):
+                 estop_cooldown_s: float = 0.4, turn_ema_alpha: float = 0.2, **_):
         self.drive_center = as_sides(drive_center)
         self.drive_scale = float(drive_scale)
         self.steering = SaccadicSteering(
             v_cruise=v_cruise, v_escape=v_escape, saccade_rate=saccade_rate,
             saccade_duration_s=saccade_duration_s, refractory_s=refractory_s,
-            estop_cooldown_s=estop_cooldown_s)
+            estop_cooldown_s=estop_cooldown_s, turn_ema_alpha=turn_ema_alpha)
 
-    # The three calibrated quantities live on the steering object now;
+    # The four calibrated quantities live on the steering object now;
     # `calibrate_controller` and `main` still assign them here by name.
     def _threshold_property(name):
         return property(lambda self: getattr(self.steering, name),
@@ -171,6 +179,7 @@ class _BilateralController:
 
     turn_offset = _threshold_property("turn_offset")
     saccade_threshold = _threshold_property("saccade_threshold")
+    turn_ema_threshold = _threshold_property("turn_ema_threshold")
     estop_threshold = _threshold_property("estop_threshold")
     v_cruise = _threshold_property("v_cruise")
     v_escape = _threshold_property("v_escape")
@@ -505,6 +514,16 @@ def calibrate_controller(controller, encoder: BilateralEncoder, cfg_template: Ar
     * `saccade_threshold`, a high percentile of the centred turn magnitude,
       is the noise floor, so a saccade fires only on evidence an empty
       corridor does not produce;
+    * `turn_ema_threshold`, the same percentile applied to an exponential
+      moving average of the centred turn signal instead of any single tick
+      -- see `SaccadicSteering`'s docstring for why: a trial was diagnosed
+      where the turn signal stayed correctly signed but under
+      `saccade_threshold` for 7+ seconds and produced no correction at all.
+      Smoothing suppresses the noise this threshold is calibrated against
+      far more than it suppresses a sustained bias, since noise partly
+      cancels tick-to-tick and a real bias does not, so this threshold ends
+      up well below `saccade_threshold` on the same corridor -- that gap is
+      exactly the extra sensitivity the smoothed statistic buys.
     An earlier version calibrated on the obstacle arenas themselves and so
     measured genuine obstacle responses as though they were noise: it put the
     saccade threshold at 0.30-0.43 when the true empty-corridor noise floor
@@ -521,23 +540,27 @@ def calibrate_controller(controller, encoder: BilateralEncoder, cfg_template: Ar
     reference while steering can use the tight one.
     """
     def _collect(cfg_dicts):
-        turns_, stats_ = [], []
+        # Per-trial turn sequences, not a single flattened list -- the EMA
+        # below is a temporal statistic and must not carry state across a
+        # trial boundary into the next trial's first tick.
+        per_trial_turns, stats_ = [], []
         for cfg_d in cfg_dicts:
             r = run_trial(controller, ArenaConfig(**cfg_d), encoder, resolution, tick_hz,
                           max_ticks, keep_telemetry=True, force_straight=True)
-            for row in r.telemetry:
-                if "turn_raw" in row:
-                    turns_.append(row["turn_raw"])
-                    stats_.append(row["estop_stat"])
-        return turns_, stats_
+            trial_turns = [row["turn_raw"] for row in r.telemetry if "turn_raw" in row]
+            per_trial_turns.append(trial_turns)
+            stats_.extend(row["estop_stat"] for row in r.telemetry if "turn_raw" in row)
+        return per_trial_turns, stats_
 
     empty = {**cfg_template.__dict__, "n_obstacles": 0,
              "corridor_length": cfg_template.goal_x}
-    turns, _ = _collect([{**empty, "seed": s} for s in seeds])
+    per_trial_turns, _ = _collect([{**empty, "seed": s} for s in seeds])
     _, stats = _collect([{**cfg_template.__dict__, "seed": s} for s in seeds])
+    turns = [x for trial in per_trial_turns for x in trial]
     if not turns or not stats:
         return {"turn_offset": 0.0, "estop_threshold": float("inf"),
-                "saccade_threshold": float("inf"), "n_samples": 0}
+                "saccade_threshold": float("inf"), "turn_ema_threshold": float("inf"),
+                "n_samples": 0}
     turn_offset = float(np.median(turns))
     threshold = float(np.percentile(stats, estop_percentile))
     # Escape must mean "beyond anything seen while cruising". If the statistic
@@ -555,11 +578,23 @@ def calibrate_controller(controller, encoder: BilateralEncoder, cfg_template: Ar
     # the flow baseline's (a ratio of pooled drives) need not share a scale.
     centred = np.abs(np.array(turns) - turn_offset)
     saccade_threshold = float(np.percentile(centred, saccade_percentile))
+
+    # Same idea, run through the EMA `SaccadicSteering` itself accumulates,
+    # per trial so the average never bleeds across a trial boundary.
+    ema_centred = [
+        abs(v) for trial in per_trial_turns
+        for v in ema_trace([x - turn_offset for x in trial], controller.steering.turn_ema_alpha)
+    ]
+    turn_ema_threshold = (float(np.percentile(ema_centred, saccade_percentile))
+                          if ema_centred else float("inf"))
+
     controller.turn_offset = turn_offset
     controller.estop_threshold = threshold
     controller.saccade_threshold = saccade_threshold
+    controller.turn_ema_threshold = turn_ema_threshold
     return {"turn_offset": turn_offset, "estop_threshold": threshold,
             "saccade_threshold": saccade_threshold,
+            "turn_ema_threshold": turn_ema_threshold,
             "n_samples": len(turns), "n_estop_samples": len(stats),
             "turn_raw_mean": float(np.mean(turns)),
             "turn_centred_median": float(np.median(centred)),
@@ -617,6 +652,7 @@ def main(columns_csv: Path, n_arenas: int, resolution: int, tick_hz: float,
                 cc["estop_disabled"] = True
             print(f"  {name}: turn_offset={cc['turn_offset']:+.3f} "
                   f"saccade_threshold={cc['saccade_threshold']:.3f} "
+                  f"turn_ema_threshold={cc['turn_ema_threshold']:.3f} "
                   f"(centred median {cc['turn_centred_median']:.3f})  "
                   + (f"estop DISABLED (would have been {cc['estop_threshold']:.2f})"
                      if disable_escape else

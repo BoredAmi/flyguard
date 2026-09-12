@@ -11,6 +11,15 @@ narrower and more interesting than "does it work":
 
 Short answer: **it degrades, monotonically, and the reasons are measurable.**
 
+> **Not the Google/DeepMind fly-brain project.** If you've seen the 2026 headlines about a
+> connectome-derived fly brain playing Doom and Minecraft, that's a different, much larger
+> effort (a whole-CNS connectome plus a graph model trained around it by reinforcement
+> learning -- see [Citation](#citation)). This repo shares a data source in spirit -- a real
+> connectome, not a trained brain -- but trains nothing, anywhere, ever. The question it
+> asks is the opposite kind: not "can a connectome control a body" but "how much of one
+> specific textbook mechanism survives once the idealized model is replaced by the measured
+> wiring." Smaller claim, zero learned parameters, different point.
+
 ![Radial motion opponency on the real connectome](docs/hemisphere_sweep.png)
 
 ---
@@ -165,13 +174,20 @@ Over 10 arenas, 7 obstacles each, nothing trained:
 | Controller | Collisions | Goals | Mean distance | E-stop ticks |
 |---|---:|---:|---:|---:|
 | straight (no vision) | 100% | 0% | 7.9 / 29 m | 0 |
-| **flow** (same eyes, no circuit) | **40%** | **10%** | **23.2 / 29 m** | 28 |
-| **connectome** (530 neurons) | 90% | 0% | 11.8 / 29 m | 46 |
+| **flow** (same eyes, no circuit) | **30%** | **20%** | **24.9 / 29 m** | 28 |
+| **connectome** (530 neurons) | 90% | 0% | 11.8 / 29 m | 49 |
 
 Both vision controllers beat the blind baseline. **The connectome trails the flow signal
-it is fed, badly** -- 90% collisions against 40%, half the distance -- and that is what
-the middle row exists to detect. Both share identical gains, normalisation and
+it is fed, badly** -- 90% collisions against 30%, less than half the distance -- and that
+is what the middle row exists to detect. Both share identical gains, normalisation and
 calibration; the only difference is whether 530 real neurons sit in between.
+
+*(`flow`'s numbers moved from an earlier 40%/10%/23.2m after the steering-law addition
+described further down (the wall/obstacle split just below, and the turn-signal-accumulator
+note under Limitations): it fixed one arena outright, from an obstacle collision straight
+through to the goal, and left every other arena unchanged. `connectome`'s aggregate row is
+unchanged to three significant figures, though not because nothing moved underneath it --
+one arena improved, one regressed, by coincidence they cancel exactly.)*
 
 **But "collision rate" was hiding the actual failure.** Classifying *what* each trial hit
 (`arena.collision_kind`) splits it cleanly:
@@ -179,25 +195,48 @@ calibration; the only difference is whether 530 real neurons sit in between.
 | Controller | hit a wall | hit an obstacle |
 |---|---:|---:|
 | straight (no vision) | 0 | **10** |
-| flow | 1 | 3 |
-| **connectome** | **8** | **1** |
+| flow | 1 | 2 |
+| **connectome** | **7** | **2** |
 
 The blind baseline does the expected thing: it drives into pillars. The connectome
-controller almost never hits a pillar -- it drives into the **corridor wall**, 8 times out
+controller almost never hits a pillar -- it drives into the **corridor wall**, 7 times out
 of 9. The corridor is 8 m wide and every arena is passable with 1.6 m of clearance.
 
 The trajectories say why. Final headings cluster at exactly **+/-27.5 deg** -- one saccade is
 1.6 rad/s x 0.3 s = 27.5 deg -- and at **-80 deg**, which is the heading clamp. So the agent either
 commits a single turn and then holds it, or turns the same way repeatedly until it runs out
-of heading, and in both cases slides into a wall it never turns away from. Six of the eight
+of heading, and in both cases slides into a wall it never turns away from. All seven of the
 wall strikes are on the same side. That is a **systematic steering bias**, not a failure to
-see obstacles, and it is not removed by the measured `turn_offset`.
+see obstacles, and it is not removed by the measured `turn_offset` -- nor, it turns out, by
+the turn-signal accumulator below, which changed *which* two arenas collide with what
+without changing the bias itself.
 
 Two known properties of the design meet here. A bilateral difference is blind to anything
 symmetric about the midline, so a wall approached at a shallow angle produces little signal;
 and the escape channel that exists to cover exactly that case is saturated (below). `python
 -m flyguard.diagnose_trial --arena 9` replays a single trial and prints the turn signal
 against its own threshold every tick, which is how this was found.
+
+**What that trace actually showed, on arena 9, was a third failure shape.** The turn signal
+stayed correctly signed away from the wall for the whole 8-second approach, but sat just
+under the calibrated threshold on 80 of 82 ticks -- not absent, not wrong-sign, just
+*chronically weak*. `SaccadicSteering` now carries a second, independent trigger for this:
+an exponential moving average of the same signal, calibrated the same way (a high percentile
+of its own noise floor on an empty corridor) but on the smoothed trace rather than any single
+tick, since a real sustained bias survives smoothing far better than tick-to-tick noise does.
+It's additive -- an isolated strong obstacle still fires the instant threshold exactly as
+before -- and it defaults to off, so nothing changes unless it's calibrated in.
+
+**Re-running arena 9 with it: the mechanism fires as designed and the trial still
+collides**, later rather than never (x=7.9 m instead of 7.4 m) -- the same rightward bias
+reasserts itself a couple of seconds after each correction. Across all 10 arenas the effect
+is genuinely mixed, not a fix: one arena that used to hit the wall now hits an obstacle
+further down the corridor instead (net collision either way), and one arena that used to
+finish cleanly now collides with an obstacle it didn't before -- they cancel, which is why
+the connectome row in the headline table above didn't move. `flow`'s row did move, from one
+clean rescue (an obstacle collision that now reaches the goal outright). Reported as what it
+is: the addition changes individual trajectories in both directions without reducing the
+connectome controller's aggregate collision rate on this benchmark.
 
 > **Steering is not in the connectome, and this repo is the reason I know that.** LPLC2/LC4
 > reach DNp01 and have *zero* edges onto the steering neurons. So the turn command compares
@@ -211,21 +250,29 @@ same move as the cell-type ablations above:
 
 | | with escape | without escape |
 |---|---|---|
-| flow | 40% coll, 10% goal, 23.2 m | 40% coll, **60% goal**, 24.0 m |
-| connectome | 90% coll, 0% goal, 11.8 m | 100% coll, 0% goal, **7.8 m** |
+| flow | 30% coll, 20% goal, 24.9 m | 40% coll, **60% goal**, 24.2 m |
+| connectome | 90% coll, 0% goal, 11.8 m | 100% coll, 0% goal, **10.1 m** |
 | *straight, for reference* | *100% coll, 0% goal, 7.9 m* | |
 
 Two things fall out, and neither is kind to the circuit.
 
-**Without the escape channel the connectome controller (7.8 m) is indistinguishable from
-driving blind (7.9 m).** Its *steering* contribution is not merely small, it is absent:
-every metre it gains over the vision-free baseline comes from braking. That is a harder
-result than "it trails the baseline", and it is the one worth reporting.
+**Without the escape channel the connectome controller (10.1 m) is no longer
+indistinguishable from driving blind (7.9 m), and that claim needs a caveat rather than a
+clean update.** This used to read 7.8 m -- flatly equal to blind -- before the turn-signal
+accumulator above gave the steering-only circuit enough extra correction to pull ahead.
+Whether a 2.2 m gap is real or arena luck is exactly what this benchmark's own stated
+limitation (n=10, single-arena spreads of +/-14-21 m measured elsewhere in this file) says
+we cannot currently tell apart. Read it as: *steering's contribution is small and possibly
+zero*, not *provably zero* -- the stronger claim this section used to make was true of the
+old steering law and is not a safe read of the current one without more arenas.
 
-**Meanwhile the escape channel actively costs the flow controller.** Removing it takes
-flow from 10% to **60%** goals reached at the same 40% collision rate -- the braking was
-stopping a controller that was steering perfectly well without it. So the one channel the
-anatomy genuinely licenses is, as modelled here, worse than not having it.
+**Meanwhile the escape channel still actively costs the flow controller.** Removing it
+takes flow from 20% to **60%** goals reached, and *lowers* the collision rate too (40% ->
+30% with escape, i.e. escape trades a better collision rate for far fewer finished runs) --
+the braking is stopping a controller that would otherwise reach the goal more often, at
+the cost of a somewhat higher collision rate when it doesn't. So the one channel the
+anatomy genuinely licenses is, as modelled here, a real trade rather than a pure loss --
+still not a flattering one.
 
 **Why: DNp01 is saturated.** With 2 DNp01 neurons, a 100 ms tick and a 2.2 ms refractory
 period the ceiling is ~90 spikes. Swept directly, it sits at 84-87 across the *entire*
@@ -257,13 +304,13 @@ and each regenerated by `python -m flyguard.validate_arena`:
   the saturated e-stop above actually costs something.
 
 **A static measurement predicted the wrong sign, twice over.** Excluding the ground from
-the encoder's input is worth about 6 m of progress: re-running the whole benchmark under
-both bands gives
+the encoder's input is worth about 9 m of progress for the flow controller and over 1 m for
+the connectome: re-running the whole benchmark under both bands gives
 
 | row band | flow | connectome |
 |---|---|---|
-| upper 60% (ground masked, default) | 40% coll, **23.2 m** | 90% coll, 11.8 m |
-| full frame | 50% coll, 17.2 m | 90% coll, 9.5 m |
+| upper 60% (ground masked, default) | 30% coll, **24.9 m** | 90% coll, 11.8 m |
+| full frame | 60% coll, 15.7 m | 90% coll, 10.5 m |
 
 yet the *static* signal-to-noise measurement ranks the full frame **better** (6.0 vs 4.0).
 The ground genuinely carries no obstacle signal (SNR 0.7), but it is densely textured and
@@ -384,7 +431,7 @@ rate curve.
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[all]"                         # or just "." for the robot runtime
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q      # 224 tests
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q      # 236 tests
 ```
 
 The extracted subnetwork (`data/looming.npz`, ~1 MB) is committed, so most of the repo runs
@@ -500,12 +547,20 @@ stands.
   unavailable by construction.
 - **n = 1 animal**, single-seed runs, 5 trials per condition, no confidence intervals.
   The paired mirror comparison makes this concrete: per-arena differences reach +14.5 m and
-  -21.5 m, an order of magnitude larger than the mean differences being compared. The
-  headline flow-vs-connectome gap (23.2 m vs 11.8 m) is wide enough to survive that; the
-  smaller comparisons in this README are indicative, not measured.
+  -21.5 m, an order of magnitude larger than the mean differences being compared (that
+  specific comparison predates the turn-signal accumulator above and hasn't been re-run
+  under it, so treat the spread as illustrative of the general problem rather than a live
+  number). The headline flow-vs-connectome gap (24.9 m vs 11.8 m) is wide enough to survive
+  that; the smaller comparisons in this README are indicative, not measured.
 - Connection signs are *predicted* (~87% classifier accuracy), not measured.
 - `syn_count` is anatomy, not physiological strength. No neuromodulation, no plasticity.
-- FAFB is brain-only; leg motor circuits live in the ventral nerve cord (BANC).
+- FAFB is brain-only; leg motor circuits live in the ventral nerve cord (BANC). A same-species
+  whole-CNS connectome now exists (Janelia/Google's male-cns:v1.0, brain + cord together,
+  166k neurons) and is the first dataset that could actually test whether LPLC2/LC4 reach
+  DNa01/DNa02/MDN once the cord is included, rather than just being brain-cropped away.
+  `flyguard/query_male_cns.py` runs that check over the NeuPrint API; it needs a personal
+  API token (login-only, can't be scripted around) so it hasn't been run yet -- see the file's
+  docstring.
 
 ### One methodological note worth stealing
 
@@ -549,9 +604,10 @@ flyguard/
   diagnose_trial.py         per-tick post-mortem of a single trial
   make_demo_gif.py          recorded runs -> the animation above (Pillow only)
   make_run_page.py    recorded run -> docs/corridor_run.html (interactive)
+  query_male_cns.py         does LPLC2/LC4 reach steering DNs via the VNC? (needs a NeuPrint token)
 
 ros2_ws/src/flyguard_ros2/  camera_node, vision_node, looming_node, demo_stimulus_node
-tests/                      224 tests; runtime + calibration need no MuJoCo and no CSVs
+tests/                      236 tests; runtime + calibration need no MuJoCo and no CSVs
 ```
 
 ---
@@ -562,6 +618,15 @@ tests/                      224 tests; runtime + calibration need no MuJoCo and 
 - Klapoetke, N. C. et al. Ultra-selective looming detection from radial motion opponency. *Nature* **551**, 237-241 (2017).
 - Shiu, P. K. et al. A leaky integrate-and-fire computational model based on the connectome of the entire adult *Drosophila* brain (2024).
 - Lee, D. N. A theory of visual control of braking based on information about time-to-collision. *Perception* **5**, 437-459 (1976).
+- Janelia FlyEM / Google Research. Male CNS connectome (male-cns:v1.0): the complete male
+  *Drosophila* brain and ventral nerve cord, 166k neurons, 125M synapses (2026).
+  [research.google/blog](https://research.google/blog/a-connectomics-milestone-mapping-the-complete-male-fruit-fly-brain/)
+- FlyGM: a whole-brain connectomic graph model for whole-body fly locomotion, trained by
+  imitation + PPO on top of fixed anatomical connectome weights ([arXiv:2602.17997](https://arxiv.org/abs/2602.17997)).
+  Their point-neuron LIF baseline -- no learned graph interface, closest in spirit to this
+  repo -- "never produced a stable gait" for whole-body control; independent, much
+  larger-scale support for this project's own finding that the bare connectome-derived
+  circuit doesn't beat a simple baseline in closed loop (see "Closing the loop" above).
 
 ## Licence
 

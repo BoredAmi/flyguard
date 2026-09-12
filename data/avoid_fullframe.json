@@ -30,34 +30,191 @@
       "turn_offset": 0.0086,
       "estop_threshold": 0.9196340000000002,
       "saccade_threshold": 0.10546800000000016,
+      "turn_ema_threshold": 0.06038617390479556,
       "n_samples": 867,
       "n_estop_samples": 440,
-      "turn_raw_mean": 0.007795040369088812,
+      "turn_raw_mean": 0.007795271049596309,
       "turn_centred_median": 0.0299,
       "estop_stat_median": 0.71105,
       "estop_stat_max": 1.0
     },
     "connectome": {
-      "turn_offset": 0.064,
+      "turn_offset": 0.0632,
       "estop_threshold": 88.0,
-      "saccade_threshold": 0.13883800000000052,
+      "saccade_threshold": 0.13803800000000052,
+      "turn_ema_threshold": 0.06641936745122475,
       "n_samples": 867,
       "n_estop_samples": 440,
-      "turn_raw_mean": 0.058470011534025375,
-      "turn_centred_median": 0.0232,
+      "turn_raw_mean": 0.05839342560553633,
+      "turn_centred_median": 0.023299999999999987,
       "estop_stat_median": 87.0,
       "estop_stat_max": 88.0
     }
   },
   "results": {
+    "straight": {
+      "n_arenas": 10,
+      "collision_rate": 1.0,
+      "goal_rate": 0.0,
+      "mean_progress_x": 7.869999999999989,
+      "mean_min_clearance": -0.06482309438958662,
+      "mean_estop_ticks": 0.0,
+      "wall_collisions": 0,
+      "obstacle_collisions": 10,
+      "seconds": 0.0,
+      "per_arena": [
+        {
+          "controller": "straight",
+          "arena_seed": 0,
+          "collided": true,
+          "reached_goal": false,
+          "ticks": 54,
+          "progress_x": 5.399999999999997,
+          "path_length": 5.399999999999997,
+          "min_clearance": -0.056974375374612196,
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
+        },
+        {
+          "controller": "straight",
+          "arena_seed": 1,
+          "collided": true,
+          "reached_goal": false,
+          "ticks": 53,
+          "progress_x": 5.299999999999997,
+          "path_length": 5.299999999999997,
+          "min_clearance": -0.0989785678739386,
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
+        },
+        {
+          "controller": "straight",
+          "arena_seed": 2,
+          "collided": true,
+          "reached_goal": false,
+          "ticks": 58,
+          "progress_x": 5.799999999999995,
+          "path_length": 5.799999999999995,
+          "min_clearance": -0.01137673679976875,
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
+        },
+        {
+          "controller": "straight",
+          "arena_seed": 3,
+          "collided": true,
+          "reached_goal": false,
+          "ticks": 158,
+          "progress_x": 15.79999999999996,
+          "path_length": 15.79999999999996,
+          "min_clearance": -0.05225261903277839,
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
+        },
+        {
+          "controller": "straight",
+          "arena_seed": 4,
+          "collided": true,
+          "reached_goal": false,
+          "ticks": 88,
+          "progress_x": 8.799999999999985,
+          "path_length": 8.799999999999985,
+          "min_clearance": -0.09906210706204094,
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
+        },
+        {
+          "controller": "straight",
+          "arena_seed": 5,
+          "collided": true,
+          "reached_goal": false,
+          "ticks": 123,
+          "progress_x": 12.299999999999972,
+          "path_length": 12.299999999999972,
+          "min_clearance": -0.09828417597313327,
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
+        },
+        {
+          "controller": "straight",
+          "arena_seed": 6,
+          "collided": true,
+          "reached_goal": false,
+          "ticks": 53,
+          "progress_x": 5.299999999999997,
+          "path_length": 5.299999999999997,
+          "min_clearance": -0.08942647003541576,
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
+        },
+        {
+          "controller": "straight",
+          "arena_seed": 7,
+          "collided": true,
+          "reached_goal": false,
+          "ticks": 54,
+          "progress_x": 5.399999999999997,
+          "path_length": 5.399999999999997,
+          "min_clearance": -0.07872024301661801,
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
+        },
+        {
+          "controller": "straight",
+          "arena_seed": 8,
+          "collided": true,
+          "reached_goal": false,
+          "ticks": 55,
+          "progress_x": 5.4999999999999964,
+          "path_length": 5.4999999999999964,
+          "min_clearance": -0.053963008312748195,
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
+        },
+        {
+          "controller": "straight",
+          "arena_seed": 9,
+          "collided": true,
+          "reached_goal": false,
+          "ticks": 91,
+          "progress_x": 9.099999999999984,
+          "path_length": 9.099999999999984,
+          "min_clearance": -0.009192640414812103,
+          "n_estop_ticks": 0,
+          "collision_kind": "obstacle",
+          "final_y": 0.0,
+          "final_heading_deg": 0.0
+        }
+      ]
+    },
     "flow": {
       "n_arenas": 10,
-      "collision_rate": 0.5,
+      "collision_rate": 0.6,
       "goal_rate": 0.1,
-      "mean_progress_x": 17.170931077828037,
-      "mean_min_clearance": 0.13722725878378064,
-      "mean_estop_ticks": 42.4,
-      "seconds": 36.7,
+      "mean_progress_x": 15.703868654089604,
+      "mean_min_clearance": 0.10940315475896253,
+      "mean_estop_ticks": 42.2,
+      "wall_collisions": 3,
+      "obstacle_collisions": 3,
+      "seconds": 33.8,
       "per_arena": [
         {
           "controller": "flow",
@@ -68,7 +225,10 @@
           "progress_x": 6.133190775613017,
           "path_length": 8.359999999999996,
           "min_clearance": -0.07346967266481341,
-          "n_estop_ticks": 42
+          "n_estop_ticks": 42,
+          "collision_kind": "wall",
+          "final_y": -3.7234696726648133,
+          "final_heading_deg": -80.0
         },
         {
           "controller": "flow",
@@ -79,18 +239,24 @@
           "progress_x": 3.2679518608926954,
           "path_length": 5.989999999999997,
           "min_clearance": -0.079324379144885,
-          "n_estop_ticks": 43
+          "n_estop_ticks": 43,
+          "collision_kind": "wall",
+          "final_y": -3.729324379144885,
+          "final_heading_deg": -80.0
         },
         {
           "controller": "flow",
           "arena_seed": 2,
           "collided": true,
           "reached_goal": false,
-          "ticks": 166,
-          "progress_x": 13.209355277274813,
-          "path_length": 14.219999999999954,
-          "min_clearance": -0.06225313004229305,
-          "n_estop_ticks": 34
+          "ticks": 150,
+          "progress_x": 12.672914623327163,
+          "path_length": 13.249999999999963,
+          "min_clearance": -0.05153463889058146,
+          "n_estop_ticks": 25,
+          "collision_kind": "obstacle",
+          "final_y": 1.6787352286228008,
+          "final_heading_deg": -9.167324722093174
         },
         {
           "controller": "flow",
@@ -101,7 +267,10 @@
           "progress_x": 12.332779200557528,
           "path_length": 12.989999999999966,
           "min_clearance": -0.003060422730612855,
-          "n_estop_ticks": 13
+          "n_estop_ticks": 13,
+          "collision_kind": "obstacle",
+          "final_y": 0.5282697359568105,
+          "final_heading_deg": -36.669298888372694
         },
         {
           "controller": "flow",
@@ -112,7 +281,10 @@
           "progress_x": 26.692515431958274,
           "path_length": 28.57000000000016,
           "min_clearance": 0.5408207938909791,
-          "n_estop_ticks": 49
+          "n_estop_ticks": 49,
+          "collision_kind": "none",
+          "final_y": 2.271171461616268,
+          "final_heading_deg": -18.334649444186354
         },
         {
           "controller": "flow",
@@ -123,18 +295,24 @@
           "progress_x": 27.167724279089583,
           "path_length": 29.480000000000153,
           "min_clearance": 0.22560254533520496,
-          "n_estop_ticks": 36
+          "n_estop_ticks": 36,
+          "collision_kind": "none",
+          "final_y": 1.4935208183269395,
+          "final_heading_deg": -2.505922498838563
         },
         {
           "controller": "flow",
           "arena_seed": 6,
-          "collided": false,
+          "collided": true,
           "reached_goal": false,
-          "ticks": 320,
-          "progress_x": 27.18723779127117,
-          "path_length": 28.290000000000123,
-          "min_clearance": 0.1695272715870545,
-          "n_estop_ticks": 53
+          "ticks": 176,
+          "progress_x": 13.033835777542695,
+          "path_length": 13.679999999999959,
+          "min_clearance": -0.017465067856459238,
+          "n_estop_ticks": 56,
+          "collision_kind": "obstacle",
+          "final_y": -1.2007879153955634,
+          "final_heading_deg": 9.167324722093174
         },
         {
           "controller": "flow",
@@ -145,7 +323,10 @@
           "progress_x": 3.238954125393512,
           "path_length": 5.859999999999998,
           "min_clearance": -0.053239528753393994,
-          "n_estop_ticks": 42
+          "n_estop_ticks": 42,
+          "collision_kind": "wall",
+          "final_y": -3.703239528753394,
+          "final_heading_deg": -80.0
         },
         {
           "controller": "flow",
@@ -156,18 +337,24 @@
           "progress_x": 23.46650991062257,
           "path_length": 25.4200000000001,
           "min_clearance": 0.26258338109350665,
-          "n_estop_ticks": 94
+          "n_estop_ticks": 94,
+          "collision_kind": "none",
+          "final_y": 2.7827208326132515,
+          "final_heading_deg": -9.167324722093174
         },
         {
           "controller": "flow",
           "arena_seed": 9,
           "collided": false,
           "reached_goal": true,
-          "ticks": 315,
-          "progress_x": 29.01309212560726,
-          "path_length": 30.240000000000162,
-          "min_clearance": 0.44508572926705947,
-          "n_estop_ticks": 18
+          "ticks": 318,
+          "progress_x": 29.032310555899013,
+          "path_length": 30.260000000000165,
+          "min_clearance": 0.34311853731068054,
+          "n_estop_ticks": 22,
+          "collision_kind": "none",
+          "final_y": -1.0352676143038253,
+          "final_heading_deg": 9.167324722093174
         }
       ]
     },
@@ -175,21 +362,26 @@
       "n_arenas": 10,
       "collision_rate": 0.9,
       "goal_rate": 0.0,
-      "mean_progress_x": 9.508506827826423,
-      "mean_min_clearance": 0.02332845010262118,
-      "mean_estop_ticks": 25.3,
-      "seconds": 115.1,
+      "mean_progress_x": 10.54631828154814,
+      "mean_min_clearance": 0.00033331054977143727,
+      "mean_estop_ticks": 23.8,
+      "wall_collisions": 7,
+      "obstacle_collisions": 2,
+      "seconds": 118.6,
       "per_arena": [
         {
           "controller": "connectome",
           "arena_seed": 0,
           "collided": true,
           "reached_goal": false,
-          "ticks": 75,
-          "progress_x": 3.1030413492141617,
-          "path_length": 5.819999999999996,
-          "min_clearance": -0.015015924871325748,
-          "n_estop_ticks": 24
+          "ticks": 85,
+          "progress_x": 4.631053302353158,
+          "path_length": 6.819999999999996,
+          "min_clearance": -0.014729436498808646,
+          "n_estop_ticks": 24,
+          "collision_kind": "wall",
+          "final_y": -3.6647294364988086,
+          "final_heading_deg": -80.0
         },
         {
           "controller": "connectome",
@@ -200,51 +392,66 @@
           "progress_x": 8.362671583859791,
           "path_length": 9.259999999999984,
           "min_clearance": -0.03608732407303705,
-          "n_estop_ticks": 12
+          "n_estop_ticks": 12,
+          "collision_kind": "wall",
+          "final_y": -3.686087324073037,
+          "final_heading_deg": -27.50197416627952
         },
         {
           "controller": "connectome",
           "arena_seed": 2,
           "collided": true,
           "reached_goal": false,
-          "ticks": 133,
-          "progress_x": 11.099317013234087,
-          "path_length": 12.109999999999973,
-          "min_clearance": -0.0454439635007553,
-          "n_estop_ticks": 17
+          "ticks": 134,
+          "progress_x": 9.736316746914927,
+          "path_length": 10.45999999999998,
+          "min_clearance": -0.012443394083483106,
+          "n_estop_ticks": 42,
+          "collision_kind": "obstacle",
+          "final_y": 0.10643712642006765,
+          "final_heading_deg": -45.836623610465864
         },
         {
           "controller": "connectome",
           "arena_seed": 3,
           "collided": true,
           "reached_goal": false,
-          "ticks": 176,
-          "progress_x": 14.75260442723535,
-          "path_length": 15.499999999999968,
-          "min_clearance": -0.014088934537503928,
-          "n_estop_ticks": 30
+          "ticks": 139,
+          "progress_x": 11.283468830886815,
+          "path_length": 12.21999999999997,
+          "min_clearance": -0.005633283014619739,
+          "n_estop_ticks": 24,
+          "collision_kind": "wall",
+          "final_y": 3.6556332830146196,
+          "final_heading_deg": 36.669298888372694
         },
         {
           "controller": "connectome",
           "arena_seed": 4,
-          "collided": true,
+          "collided": false,
           "reached_goal": false,
-          "ticks": 104,
-          "progress_x": 8.393622598176862,
-          "path_length": 9.279999999999985,
-          "min_clearance": -0.019189883970932353,
-          "n_estop_ticks": 16
+          "ticks": 320,
+          "progress_x": 28.14756744996086,
+          "path_length": 29.620000000000154,
+          "min_clearance": 0.2960842319370548,
+          "n_estop_ticks": 34,
+          "collision_kind": "none",
+          "final_y": -0.1293555779356388,
+          "final_heading_deg": 9.167324722093174
         },
         {
           "controller": "connectome",
           "arena_seed": 5,
           "collided": true,
           "reached_goal": false,
-          "ticks": 123,
-          "progress_x": 10.512458695331297,
-          "path_length": 11.389999999999977,
+          "ticks": 117,
+          "progress_x": 9.9124586953313,
+          "path_length": 10.78999999999998,
           "min_clearance": -0.04092956074858911,
-          "n_estop_ticks": 13
+          "n_estop_ticks": 13,
+          "collision_kind": "wall",
+          "final_y": -3.690929560748589,
+          "final_heading_deg": -27.50197416627952
         },
         {
           "controller": "connectome",
@@ -255,18 +462,24 @@
           "progress_x": 7.421963618683475,
           "path_length": 8.319999999999988,
           "min_clearance": -0.026125405060874574,
-          "n_estop_ticks": 4
+          "n_estop_ticks": 4,
+          "collision_kind": "wall",
+          "final_y": -3.6761254050608745,
+          "final_heading_deg": -27.50197416627952
         },
         {
           "controller": "connectome",
           "arena_seed": 7,
-          "collided": false,
+          "collided": true,
           "reached_goal": false,
-          "ticks": 320,
-          "progress_x": 21.49725701145613,
-          "path_length": 23.880000000000074,
-          "min_clearance": 0.5678150405290724,
-          "n_estop_ticks": 116
+          "ticks": 219,
+          "progress_x": 16.025550606418,
+          "path_length": 17.41999999999998,
+          "min_clearance": -0.019153180220085664,
+          "n_estop_ticks": 64,
+          "collision_kind": "obstacle",
+          "final_y": -0.2591599778719873,
+          "final_heading_deg": -9.167324722093174
         },
         {
           "controller": "connectome",
@@ -277,7 +490,10 @@
           "progress_x": 2.5412258209709173,
           "path_length": 5.129999999999999,
           "min_clearance": -0.09220557923908679,
-          "n_estop_ticks": 21
+          "n_estop_ticks": 21,
+          "collision_kind": "wall",
+          "final_y": -3.7422055792390867,
+          "final_heading_deg": -80.0
         },
         {
           "controller": "connectome",
@@ -288,7 +504,10 @@
           "progress_x": 7.400906160102162,
           "path_length": 8.299999999999986,
           "min_clearance": -0.045443963500755746,
-          "n_estop_ticks": 0
+          "n_estop_ticks": 0,
+          "collision_kind": "wall",
+          "final_y": -3.6954439635007557,
+          "final_heading_deg": -27.50197416627952
         }
       ]
     }
